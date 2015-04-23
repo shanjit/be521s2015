@@ -19,6 +19,7 @@ for patient = 1:3
     x = size(u,1);  
     temp1 = (1:x)*(noverlap/1000);
     
+    % change temp2 if you want to use the training set when predicting
     temp2 = (1:147500)*(1/1000);
     
     for i = 1:5
