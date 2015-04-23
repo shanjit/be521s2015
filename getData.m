@@ -1,0 +1,72 @@
+function[] = getData()
+% Run this script once to get all the data
+
+% if data not downloaded then download
+if (exist('train_data_1.mat','file')~=2)
+    % Patient 1 
+    % Properties of the dataset 
+    % Total number of train samples = 310000 on 62 channels
+    % Total number of testing samples = 147500 on 62 channels
+    % train labels has 310000 samples of 62 channels, we need to predict the
+    % labels for this
+
+    session1 = IEEGSession('I521_A0012_D001', 'shanjitsingh', 'login.bin');
+    session2 = IEEGSession('I521_A0012_D002', 'shanjitsingh', 'login.bin');
+    session3 = IEEGSession('I521_A0012_D003', 'shanjitsingh', 'login.bin');
+    train_data_1 = session1.data.getvalues(1:310000,1:62);
+    train_labels_1 = session2.data.getvalues(1:310000, 1:5);
+    test_data_1 = session3.data.getvalues(1:147500,1:62);
+    save('train_data_1.mat','train_data_1');
+    save('train_labels_1.mat','train_labels_1');
+    save('test_data_1.mat','test_data_1');
+
+
+    % Patient 2
+    % Properties of the dataset 
+    % Total number of train samples = 310000 on 48 channels
+    % Total number of testing samples = 147500 on 48 channels
+    % train labels has 310000 samples of 48 channels, we need to predict the
+    % labels for this
+
+    close all;
+    clear all;
+    clc;
+    session1 = IEEGSession('I521_A0013_D001', 'shanjitsingh', 'login.bin');
+    session2 = IEEGSession('I521_A0013_D002', 'shanjitsingh', 'login.bin');
+    session3 = IEEGSession('I521_A0013_D003', 'shanjitsingh', 'login.bin');
+    train_data_2 = session1.data.getvalues(1:310000,1:48);
+    train_labels_2 = session2.data.getvalues(1:310000, 1:5);
+    test_data_2 = session3.data.getvalues(1:147500,1:48);
+    save('train_data_2.mat','train_data_2');
+    save('train_labels_2.mat','train_labels_2');
+    save('test_data_2.mat','test_data_2');
+
+    % Patient 3
+    % Properties of the dataset 
+    % Total number of train samples = 310000 on 64 channels
+    % Total number of testing samples = 147500 on 64 channels
+    % train labels has 310000 samples of 64 channels, we need to predict the
+    % labels for this
+    close all;
+    clear all;
+    clc;
+    session1 = IEEGSession('I521_A0014_D001', 'shanjitsingh', 'login.bin');
+    session2 = IEEGSession('I521_A0014_D002', 'shanjitsingh', 'login.bin');
+    session3 = IEEGSession('I521_A0014_D003', 'shanjitsingh', 'login.bin');
+    train_data_3 = session1.data.getvalues(1:310000,1:64);
+    train_labels_3 = session2.data.getvalues(1:310000, 1:5);
+    test_data_3 = session3.data.getvalues(1:147500,1:64);
+    save('train_data_3.mat','train_data_3');
+    save('train_labels_3.mat','train_labels_3');
+    save('test_data_3.mat','test_data_3');
+    clear all;
+    clc;
+    close all;
+    
+% if data is already downloaded, then display and return
+else 
+    disp('All data is already downloaded.');
+
+end
+
+end
