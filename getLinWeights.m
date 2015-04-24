@@ -1,12 +1,13 @@
-function [weights,r,r1] = getLinWeights(features)
+function [weights,r,r1] = getLinWeights(features, config, patient)
 
 
-N = 1:3;
+N = 1:config.('history');
 
-noverlap = 50;
+noverlap = config.('noverlap');
 
 
-for patient = 1:3
+%for patient = 1:3
+    
     % load the corresponding data set and make it your train_data, train_labels
     % and test_data
     td = load(strcat('train_data_',num2str(patient)), strcat('train_data_',num2str(patient)));
@@ -29,7 +30,7 @@ for patient = 1:3
     
     X{patient}.weights = mldivide((R'*R),(R'*train));
     
-end
+%end
 
 weights = X;
 

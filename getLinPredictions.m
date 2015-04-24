@@ -1,16 +1,16 @@
-function [predictions] = getLinPredictions(weights, features)
+function [predictions] = getLinPredictions(weights, features, config, patient)
 
 
 % noverlap samples of overlap between adjoining sections.
-noverlap = 50;
+noverlap = config.('noverlap');
 
-N = 1:3;  
+N = 1:config.('history');  
 
 
 final_predictions = cell(3,1);
 
 
-for patient = 1:3
+%for patient = 1:3
 
     R = getRMatrix(features, patient, N);
  
@@ -31,7 +31,7 @@ for patient = 1:3
         
 final_predictions{patient} = predictions;
 
-end
+%end
 
 predictions = final_predictions;
 

@@ -4,7 +4,7 @@
 % NOTE: running this file again will recalculate all features and overwrite
 % the files.
 
-function[features] = getFeatures(str)
+function[features] = getFeatures(str, config, patient)
 
 % define the other feature functions which you'd like to use here
 TimeAvgVolt = @(x)mean(x)
@@ -12,26 +12,26 @@ TimeAvgVolt = @(x)mean(x)
 str = strcat(str,'_');
 
 % define frequency bands in hertz
-freqbands = [5 15; 20 25; 75 115; 125 160; 160 175];
+freqbands = config.('freqbands');
 
 % spectrogram definitions - http://www.mathworks.com/help/signal/ref/spectrogram.html
 % s = spectrogram(x) returns the short-time Fourier transform of the input signal, x.
 % Each column of s contains an estimate of the short-term, time-localized frequency content of x.
 
 % window to divide the signal into sections and perform windowing
-window = 100;
+window = config.('window');
 % noverlap samples of overlap between adjoining sections.
-noverlap = 50;
+noverlap = config.('noverlap');
 % nfft sampling points to calculate the discrete Fourier transform.
-nfft = 1024;
+nfft = config.('nfft');
 % sampling frequency
-fs = 1e3;
+fs = config.('fs');
 
 % feature_matrix cells to store features for each matrix
 featurematrix = cell(3,1);
 
 % for each patient
-for patient = 1:3
+%for patient = 1:3
     
     % load the corresponding data set per patient
     td = load(strcat(str,num2str(patient)), strcat(str,num2str(patient)));
@@ -70,7 +70,7 @@ for patient = 1:3
         featurematrix{patient} = [featurematrix{patient} freqfeatures' averagetimevoltage'];
     end
     
-end
+%end
 
 
 str = strsplit(str,'_');
