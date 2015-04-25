@@ -26,8 +26,8 @@ elseif(cv==1)
 elseif(cv==2)
     xtrain = tempgetFeatures(config, patient, 'train_data', 1:310000);
     ytrain = tempgetLabels(patient, config, size(xtrain,1), 1:310000);
-    xtest = xtrain;
-    ytest = ytrain;
+    xtest = xtest;
+    y_
    
 end
 

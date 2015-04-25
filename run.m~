@@ -5,9 +5,8 @@ clear all;
 clc;
 close all;
 
-recalculateFeatures = 1;
-cv = 0; % cv can take 0,1,2
-ratio = 0.5;
+recalculateFeatures = 0;
+cv = 0;
 
 %% Step 1: Get all the data %%
 getData;
@@ -55,18 +54,23 @@ if recalculateFeatures
     %
     
     shuffleindices = randperm(310000);
-    [x_train_1, y_train_1, x_test_1, y_test_1] = getFeatures(config, 1, shuffleindices, cv, ratio);
+    
+    
+    [x_train_1, y_train_1, x_test_1, y_test_1] = getFeatures(config, 1, shuffleindices, cv);
     save('x_train_1.mat','x_train_1','y_train_1');
     save('x_test_1.mat', 'x_test_1', 'y_test_1');
     
-    [x_train_2, y_train_2, x_test_2, y_test_2] = getFeatures(config, 2, shuffleindices, cv, ratio);
+    [x_train_2, y_train_2, x_test_2, y_test_2] = getFeatures(config, 2, shuffleindices, cv);
     save('x_train_2.mat','x_train_2','y_train_2');
     save('x_test_2.mat', 'x_test_2', 'y_test_2');
     
-    [x_train_3, y_train_3, x_test_3, y_test_3] = getFeatures(config, 3, shuffleindices, cv, ratio);        
+    [x_train_3, y_train_3, x_test_3, y_test_3] = getFeatures(config, 3, shuffleindices, cv);        
     save('x_train_3.mat','x_train_3','y_train_3');
     save('x_test_3.mat', 'x_test_3', 'y_test_3');
     
+    
+    
+
     
     
     %
@@ -121,36 +125,15 @@ end
 clearvars x_train_1 y_train_1 x_train_2 y_train_2 x_train_3 y_train_3 x_test_1 x_test_2 x_test_3 recalculateFeatures y_test_1 y_test_2 y_test_3;
 
 %% verify the contents
-% DONE - load all the saved data from above and see under different
-% conditions of test, train data
+
 
 %% Step 4: Use the features to make models
 
 % At this point, there are x_train, y_train variables saved in
-% x_train_<patient_no> and x_test, y_test variables saved in
-% y_test_<patient_no>
-
-if (cv==0)
+% x_train_<patient_no> and x_test, 
 for patient = 1:3
     weights = getLinWeights(patient);
-    predictions_dg{patient} =  getLinPredictions(config,weights,patient,147500); 
-end
-
-elseif (cv==1)
-for patient = 1:3
-    weights = getLinWeights(patient);
-    [predictions_dg{patient},pho{patient}] =  getLinPredictions(config,weights,patient,310000*(1.0-ratio));
-end
-
-elseif (cv==2)
-for patient = 1:3
-    weights = getLinWeights(patient);
-    [predictions_dg{patient},pho{patient}] =  getLinPredictions(config,weights,patient,310000);
-end
-
-tempmean = [mean(cell2mat(pho{1})) mean(cell2mat(pho{2})) mean(cell2mat(pho{3}))];
-corr = mean(tempmean);
-
+    predictions_dg{patient} =  getLinPredictions(config,weights,patient,147500); % or it is 310000*0.1
 end
 
 % 1. train on the entire set and test on the entire set
