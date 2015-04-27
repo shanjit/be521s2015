@@ -2,27 +2,6 @@
 
 function [svmmodel, prediction, acc] = svm(config, patient, finger, calcsvm, numofpredictions)
 
-if(calcsvm==1)
-    disp('Recalculating SVM models.');
-tl = load(strcat('x_train_',num2str(patient)));
-
-x_train = tl.(strcat('x_train_',num2str(patient)));
-y_train = tl.(strcat('y_train_',num2str(patient)));
-
-
-param.s = 3; 					% epsilon SVR
-param.C = max(y_train) - min(y_train);	% FIX C based on Equation 9.61
-param.t = 2; 					% RBF kernel
-param.gset = 2.^[-1:1];				% range of the gamma parameter
-param.eset = [0:1];				% range of the epsilon parameter
-param.nfold = 2 ;				% 5-fold CV
-
-
-
-
-Rval = zeros(length(param.gset), length(param.eset));
-
-y_train = y_train(:,finger);
 
 
 tl = load(strcat('x_test_',num2str(patient)));
@@ -33,10 +12,33 @@ y_test = tl.(strcat('y_test_',num2str(patient)));
 if(y_test==-1)
   y_test = -1;
 else
-    y_test = y_test(:,finger);
+  y_test = y_test(:,finger);
 end
 
-size(y_test);
+
+if(calcsvm==1)
+    disp('Recalculating SVM models.');
+tl = load(strcat('x_train_',num2str(patient)));
+
+x_train = tl.(strcat('x_train_',num2str(patient)));
+y_train = tl.(strcat('y_train_',num2str(patient)));
+
+
+param.s = 3; 					% epsilon SVR
+param.C = 1;%max(y_train) - min(y_train);	% FIX C based on Equation 9.61
+param.t = 2; 					% RBF kernel
+param.gset = 2.^[-7:7];				% range of the gamma parameter
+param.eset = [0:5];				% range of the epsilon parameter
+param.nfold = 5 ;				% 5-fold CV
+
+
+
+
+Rval = zeros(length(param.gset), length(param.eset));
+
+y_train = y_train(:,finger);
+
+
 
 
 % x_train, y_train
@@ -101,8 +103,13 @@ svmmodel{patient}{finger} = svmtrain(y_train, x_train, optparam.libsvm);
 
 
 else
+    
+    if (y_test ~= -1)
     fprintf('Loading previous SVM models for patient %d, finger %d \n', patient, finger);
     load('svmmodel_predict_trainc2.mat')
+    else
+    fprintf('Loading previous SVM models for patient %d, finger %d \n', patient, finger);
+    load('svmmodels.mat');
 end
     
 

@@ -8,7 +8,7 @@ close all;
 
 recalculateFeatures = 1;
 doplot = 0;
-dolinearreg = 1;
+dolinearreg = 0;
 dosvr = 1;
 dolasso = 0;
 
@@ -90,8 +90,6 @@ pho_lasso = cell(3,1);
 predicted_dg_lin = cell(3,1);
 predicted_dg_svm = cell(3,1);
 predicted_dg_lasso = cell(3,1);
-
-
 svmmodel = cell(3,5);
 
 %% Step 3: Get all the Features
@@ -242,7 +240,7 @@ elseif (cv==1)
     % cv = 2 -> getting the training error when trained on complete data and
     % testing on complete data
 elseif (cv==2)
-    for patient = 1:3
+    for patient = 1:1
         
         % number of predictions
         numpredictions = 310000;
@@ -263,9 +261,9 @@ elseif (cv==2)
         
         if dolasso
             
-           for finger = 1:5
+           for finger = 1:1
                
-              a = lasso(config, patient, finger, 1, numpredictions); 
+              a = lassopred(config, patient, finger, 1, numpredictions); 
               predicted_dg_lasso{patient}(1:numpredictions, finger) = a;
               
            end
@@ -274,10 +272,11 @@ elseif (cv==2)
         
     end
     
+    pho = pho_lin;
     tempmean = [mean(cell2mat(pho{1})) mean(cell2mat(pho{2})) mean(cell2mat(pho{3}))];
     corr = mean(tempmean);
     
 end
 
-predicted_dg = predicted_dg_svm;
+predicted_dg = predicted_dg_lin;
 save('predicted_dg.mat', 'predicted_dg');
