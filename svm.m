@@ -14,8 +14,9 @@ param.s = 3; 					% epsilon SVR
 param.C = max(y_train) - min(y_train);	% FIX C based on Equation 9.61
 param.t = 2; 					% RBF kernel
 param.gset = 2.^[-1:1];				% range of the gamma parameter
-param.eset = [0:2];				% range of the epsilon parameter
-param.nfold = 3 ;				% 5-fold CV
+param.eset = [0:1];				% range of the epsilon parameter
+param.nfold = 2 ;				% 5-fold CV
+
 
 
 
@@ -83,7 +84,7 @@ optparam.libsvm = ['-s ', num2str(optparam.s), ' -t ', num2str(optparam.t), ...
 		' -p ', num2str(optparam.e)];
 
 
-svmmodel = svmtrain(y_train, x_train, optparam.libsvm);
+svmmodel{patient}{finger} = svmtrain(y_train, x_train, optparam.libsvm);
 
 
 else

@@ -7,7 +7,10 @@ close all;
 
     
 recalculateFeatures = 0;
-plot = 0;
+doplot = 0;
+dolinearreg = 0;
+dosvr = 0;
+
 % cv can take 0,1,2
 % cv = 0 -> training on complete data and testing on test data
 
@@ -29,7 +32,7 @@ getData;
 % plot the test and train datasets for each patient in a 3x1 plot using
 % subplots
 
-if plot==1
+if doplot==1
     
 load('train_data_1');
 load('train_labels_1');
@@ -78,9 +81,11 @@ config.('freqbands') = [5 15; 20 25; 75 115; 125 160; 160 175];
 config.('fs') = 1000;
 
 % save the final accuracies
-pho = cell(3,1);
+pho_lin = cell(3,1);
+pho_svm = cell(3,1);
 % final predictions are stored in this
-predicted_dg = cell(3,1);
+predicted_dg_lin = cell(3,1);
+predicted_dg_svm = cell(3,1);
 
 %% Step 3: Get all the Features
 % todo:
@@ -179,23 +184,46 @@ svmmodel = cell(3,1);
 % cv = 0 -> training on complete data and testing on test data
 if (cv==0) 
 for patient = 1:3
-    %[predicted_dg{patient},pho{patient}] = linearreg(config, patient, 310000);
+    
+    %number of predictions to be made
+    numpredictions = 147500;
+    
+    if dolinearreg
+    % linear regression
+    [predicted_dg_lin{patient},pho_lin{patient}] = linearreg(config, patient, numpredictions);
+    end
+    
+    if dosvr
+    % SVR
     for finger = 1:5
-    [model, a, b] = svm(config, patient, finger, 1, 147500);    
-    size(a)
-    size(b)
-    predicted_dg{patient}(1:147500,finger) = a;
-    pho{patient}(1,finger) = b;
+    [model, a, b] = svm(config, patient, finger, 1, numpredictions);
+    predicted_dg_svm{patient}(1:147500,finger) = a;
+    pho_svm{patient}(1,finger) = b;
     end 
+    end
+    
+    
 end
 
 % cv = 1 -> when training on some parts of training data and testing on
 % unseen parts of the testing data
 elseif (cv==1)
 for patient = 1:3
-    [predicted_dg{patient},pho{patient}] = linearreg(config, patient, 310000*(1.0-ratio));
+    
+    % number of predictions 
+    numpredictions = 310000*(1.0-ratio);
+    if dolinearreg
+    % linear regression
+    [predicted_dg_lin{patient},pho_lin{patient}] = linearreg(config, patient, numpredictions);
+    end
+    
+    if dosvr
+    % SVR
     for finger = 1:5
-    svmmodel{patient}{finger} = svm(config, patient, finger);    
+    [model, a, b] = svm(config, patient, finger, 1,  numpredictions);
+    predicted_dg_svm{patient}(1:147500,finger) = a;
+    pho_svm{patient}(1,finger) = b;
+    end 
     end
 end
 
@@ -207,14 +235,24 @@ corr = mean(tempmean);
 % testing on complete data
 elseif (cv==2)
 for patient = 1:3
-    %[predicted_dg{patient},pho{patient}] = linearreg(config, patient, 310000);
+    
+    % number of predictions
+    numpredictions = 310000;
+    
+    if dolinearreg
+    % linear regression
+    [predicted_dg_lin{patient},pho_lin{patient}] = linearreg(config, patient, numpredictions);
+    end
+    
+    if dosvr
+    % SVR
     for finger = 1:5
-    [model, a, b] = svm(config, patient, finger, 0, 310000);    
-    size(a)
-    size(b)
-    predicted_dg{patient}(1:310000,finger) = a;
-    pho{patient}(1,finger) = b;
+    [model, a, b] = svm(config, patient, finger, 1,  numpredictions);
+    predicted_dg_svm{patient}(1:147500,finger) = a;
+    pho_svm{patient}(1,finger) = b;
     end 
+    end
+    
 end
 
 tempmean = [mean(cell2mat(pho{1})) mean(cell2mat(pho{2})) mean(cell2mat(pho{3}))];
