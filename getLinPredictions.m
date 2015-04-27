@@ -24,6 +24,8 @@ end
 
 finalpredictions = predictions;
 
+%dummy rho
+rho = -1;
 
 y_test = tl.(strcat('y_test_',num2str(patient)));
 

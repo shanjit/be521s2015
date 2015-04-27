@@ -5,20 +5,62 @@ clear all;
 clc;
 close all;
 
-recalculateFeatures = 1;
-cv = 0; % cv can take 0,1,2
-ratio = 0.5;
+    
+recalculateFeatures = 0;
+plot = 0;
+% cv can take 0,1,2
+% cv = 0 -> training on complete data and testing on test data
+
+% cv = 1 -> when training on some parts of training data and testing on
+% unseen parts of the testing data
+
+% cv = 2 -> getting the training error when trained on complete data and
+% testing on complete data
+
+cv = 0;
+ratio = 0.95;
 
 %% Step 1: Get all the data %%
 getData;
 
 
-
-
 %% Step 1.2: Visualize the data %%
-% TODO
+
+% plot the test and train datasets for each patient in a 3x1 plot using
+% subplots
+
+if plot==1
+    
+load('train_data_1');
+load('train_labels_1');
+figure(1)
+subplot(2,1,1);
+plot(train_data_1);
+
+subplot(2,1,2);
+plot(train_labels_1);
 
 
+load('train_data_2');
+load('train_labels_2');
+figure(2)
+subplot(2,1,1);
+plot(train_data_2);
+
+subplot(2,1,2);
+plot(train_labels_2);
+
+
+load('train_data_3');
+load('train_labels_3');
+figure(3)
+subplot(2,1,1);
+plot(train_data_3);
+subplot(2,1,2);
+plot(train_labels_3);
+
+clearvars train_data_* train_labels_*
+end
 
 
 %% Step 2: Define configuration
@@ -38,7 +80,7 @@ config.('fs') = 1000;
 % save the final accuracies
 accuracy = cell(3,1);
 % final predictions are stored in this
-predictions_dg = cell(3,1);
+predicted_dg = cell(3,1);
 
 %% Step 3: Get all the Features
 % todo:
@@ -124,28 +166,36 @@ clearvars x_train_1 y_train_1 x_train_2 y_train_2 x_train_3 y_train_3 x_test_1 x
 % DONE - load all the saved data from above and see under different
 % conditions of test, train data
 
-%% Step 4: Use the features to make models
 
+
+%% Step 4: Use the features to make models
+disp('Making Models now');
 % At this point, there are x_train, y_train variables saved in
 % x_train_<patient_no> and x_test, y_test variables saved in
 % y_test_<patient_no>
 
-if (cv==0)
+% cv = 0 -> training on complete data and testing on test data
+if (cv==0) 
 for patient = 1:3
-    weights = getLinWeights(patient);
-    predictions_dg{patient} =  getLinPredictions(config,weights,patient,147500); 
+    predicted_dg{patient} = linearreg(config, patient,147500);
+    
 end
 
+% cv = 1 -> when training on some parts of training data and testing on
+% unseen parts of the testing data
 elseif (cv==1)
 for patient = 1:3
-    weights = getLinWeights(patient);
-    [predictions_dg{patient},pho{patient}] =  getLinPredictions(config,weights,patient,310000*(1.0-ratio));
+    [predicted_dg{patient},pho{patient}] = linearreg(config, patient, 310000*(1.0-ratio));
 end
 
+tempmean = [mean(cell2mat(pho{1})) mean(cell2mat(pho{2})) mean(cell2mat(pho{3}))];
+corr = mean(tempmean);
+
+% cv = 2 -> getting the training error when trained on complete data and
+% testing on complete data
 elseif (cv==2)
 for patient = 1:3
-    weights = getLinWeights(patient);
-    [predictions_dg{patient},pho{patient}] =  getLinPredictions(config,weights,patient,310000);
+    [predicted_dg{patient},pho{patient}] = linearreg(config, patient, 310000);
 end
 
 tempmean = [mean(cell2mat(pho{1})) mean(cell2mat(pho{2})) mean(cell2mat(pho{3}))];
@@ -153,81 +203,4 @@ corr = mean(tempmean);
 
 end
 
-% 1. train on the entire set and test on the entire set
-%linweights = getLinWeights(config, 1, shuffleindices);
-
-
-
-% 2. train on part of the set and test on the unseen part
-% shuffleindices = randperm(rows.('x_train_1'));
-% trainingsetratio = 0.9;
-% linweights = getLinWeights(config, 1, shuffleindices( 1:floor(rows.('x_train_1')*trainingsetratio))) ;
-% predictions = getLinPredictions(linweights, config, 1,'train', shuffleindices( 1+floor(rows.('x_train_1')*trainingsetratio):end )  );
-
-
-% 3. train on the entire set and test on the test set
-% shuffleindices = randperm(rows.('x_train_1'));
-% trainingsetratio = 1.0;
-% linweights = getLinWeights(config, 1, shuffleindices( 1:floor(rows.('x_train_1')*trainingsetratio))) ;
-% predictions = getLinPredictions(linweights, config, 1,'test', 1:147500);
-
-
-
-
-
-%%
-% 
-% for patient=1:3
-%     patient
-%     x_train = getFeatures('train_data', config, patient);
-%     x_test = getFeatures('train_data', config, patient);
-%     temp = randperm(size(x_train,1));
-%     x_train = x_train(temp,:);
-%     
-%     linweights = getLinWeights('train_labels', x_train, config, patient, temp);
-%     predictions = getLinPredictions(linweights, x_test, config, patient, 310000);
-%     
-%     
-%     accuracy{patient} = getperformance('train_labels', predictions ,patient, 1:310000);
-%     predictions_dg{patient} = predictions{patient};
-% end
-% fingers = [1 2 3 5];
-% Total_corr = [accuracy{1}(fingers) accuracy{2}(fingers) accuracy{3}(fingers)];
-% Total_avg_corr = mean(mean(cell2mat(Total_corr)))
-% 
-% 
-% 
-% 
-% % % this code gives original results
-% for patient=1:3
-%     patient
-%     x_train = getFeatures('train_data', config, patient, 1:310000);
-%     x_test = getFeatures('test_data', config, patient, 1:147500);
-%     linweights = getLinWeights('train_labels', x_train, config, patient, 1:size(x_train,1));
-%     predictions = getLinPredictions(linweights, x_test, config, patient, 147500);
-%     predictions_dg{patient} = predictions{patient};
-% end
-% 
-% % a history of 3 bits gives training accuracy of 0.6446
-% % history of 10 bits gives 0.85
-% % a history of 4 bits gives training accuracy of 0.6912
-% load('/home/cuil/Dropbox/Upenn/spring2015/BE521/now/project/results/0.414/matlab.mat')
-% clc;
-% for i=1:5
-%     for j=1:3
-%         corr(predictions{j}(:,i), predictions_dg{j}(:,i))
-%     end
-% end
-% 
-% % Step 3: apply models and make predictions
-% 
-% % Step 3.1: Apply linear models
-% %linweights = getLinWeights('train_labels', features_train, config, 1);
-% 
-% 
-% % Step 3.2: Apply other models
-% 
-% 
-% % Step 3.x: Make an ensemble
-% 
-% % Step 4: Save the final predictions and upload online
+save('predicted_dg.mat', 'predicted_dg');

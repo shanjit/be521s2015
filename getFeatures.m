@@ -14,7 +14,7 @@ if(cv==0)
    xtest =  tempgetFeatures(config, patient, 'test_data', 1:147500);
    ytest =  -1;
    % good to return
-    
+   
 elseif(cv==1)
     xtrain = tempgetFeatures(config, patient, 'train_data', shuffleindices(1:310000*ratio) );
     xtest = tempgetFeatures(config, patient, 'train_data', shuffleindices(1+(310000*ratio):end));
@@ -31,8 +31,10 @@ elseif(cv==2)
    
 end
 
-
-
+% matrix normalization and 
+[x_train, x_test] = scaleSVM(xtrain, xtest, xtrain, 0, 1);
+xtrain = x_train(:,2:end);
+xtest = x_test(:,2:end);
 
 end
 
