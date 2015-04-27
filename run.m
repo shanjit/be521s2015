@@ -17,7 +17,7 @@ plot = 0;
 % cv = 2 -> getting the training error when trained on complete data and
 % testing on complete data
 
-cv = 2;
+cv = 0;
 ratio = 0.95;
 
 %% Step 1: Get all the data %%
@@ -179,10 +179,14 @@ svmmodel = cell(3,1);
 % cv = 0 -> training on complete data and testing on test data
 if (cv==0) 
 for patient = 1:3
-    predicted_dg{patient} = linearreg(config, patient,147500);
+    %[predicted_dg{patient},pho{patient}] = linearreg(config, patient, 310000);
     for finger = 1:5
-    svmmodel{patient}{finger} = svm(config, patient, finger);    
-    end
+    [model, a, b] = svm(config, patient, finger, 1, 147500);    
+    size(a)
+    size(b)
+    predicted_dg{patient}(1:147500,finger) = a;
+    pho{patient}(1,finger) = b;
+    end 
 end
 
 % cv = 1 -> when training on some parts of training data and testing on
@@ -198,8 +202,7 @@ end
 tempmean = [mean(cell2mat(pho{1})) mean(cell2mat(pho{2})) mean(cell2mat(pho{3}))];
 corr = mean(tempmean);
 
-predict = 0;
-predict_pho = 0;
+
 % cv = 2 -> getting the training error when trained on complete data and
 % testing on complete data
 elseif (cv==2)

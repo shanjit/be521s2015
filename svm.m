@@ -96,13 +96,23 @@ tl = load(strcat('x_test_',num2str(patient)));
 x_test = tl.(strcat('x_test_',num2str(patient)));
 y_test = tl.(strcat('y_test_',num2str(patient)));
 
-y_test = y_test(:,finger);
+if(y_test==-1)
+  y_test = -1;
+else
+    y_test = y_test(:,finger);
+end
+
 
 noverlap = config.('noverlap');
 N = config.('history');
 [y_hat, acc] = svmpredict(y_test, x_test, svmmodel{patient}{finger});
 
-acc = acc(2,1)
+if y_test==-1
+    acc = 0;
+else
+    acc = acc(2,1);
+end
+
 u = y_hat;
 
 
