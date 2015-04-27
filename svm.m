@@ -109,7 +109,7 @@ end
 
 noverlap = config.('noverlap');
 N = config.('history');
-[y_hat, acc] = svmpredict(y_test, x_test, svmmodel{patient}{finger});
+[y_hat, acc] = svmpredict(zeros(size(x_test,1),1), x_test, svmmodel{patient}{finger});
 
 if y_test==-1
     acc = 0;

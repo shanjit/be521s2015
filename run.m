@@ -6,9 +6,9 @@ clc;
 close all;
 
     
-recalculateFeatures = 0;
+recalculateFeatures = 1;
 doplot = 0;
-dolinearreg = 0;
+dolinearreg = 1;
 dosvr = 1;
 
 % cv can take 0,1,2
@@ -197,9 +197,9 @@ for patient = 1:3
     
     if dosvr
     % SVR
-    for finger = 1:5
+    for finger = 1:1
     [svmmodel{patient}{finger}, a, b] = svm(config, patient, finger, 1, numpredictions);
-    predicted_dg_svm{patient}(1:147500,finger) = a;
+    predicted_dg_svm{patient}(1:numpredictions,finger) = a;
     pho_svm{patient}(1,finger) = b;
     end 
     end
@@ -214,6 +214,7 @@ for patient = 1:3
     
     % number of predictions 
     numpredictions = 310000*(1.0-ratio);
+    
     if dolinearreg
     % linear regression
     [predicted_dg_lin{patient},pho_lin{patient}] = linearreg(config, patient, numpredictions);
@@ -262,4 +263,5 @@ corr = mean(tempmean);
 
 end
 
+predicted_dg = predicted_dg_svm;
 save('predicted_dg.mat', 'predicted_dg');
