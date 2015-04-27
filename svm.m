@@ -25,6 +25,19 @@ Rval = zeros(length(param.gset), length(param.eset));
 y_train = y_train(:,finger);
 
 
+tl = load(strcat('x_test_',num2str(patient)));
+
+x_test = tl.(strcat('x_test_',num2str(patient)));
+y_test = tl.(strcat('y_test_',num2str(patient)));
+
+if(y_test==-1)
+  y_test = -1;
+else
+    y_test = y_test(:,finger);
+end
+
+size(y_test);
+
 
 % x_train, y_train
 
@@ -92,16 +105,6 @@ else
     load('svmmodel_predict_trainc2.mat')
 end
     
-tl = load(strcat('x_test_',num2str(patient)));
-
-x_test = tl.(strcat('x_test_',num2str(patient)));
-y_test = tl.(strcat('y_test_',num2str(patient)));
-
-if(y_test==-1)
-  y_test = -1;
-else
-    y_test = y_test(:,finger);
-end
 
 
 noverlap = config.('noverlap');

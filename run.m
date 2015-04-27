@@ -9,7 +9,7 @@ close all;
 recalculateFeatures = 0;
 doplot = 0;
 dolinearreg = 0;
-dosvr = 0;
+dosvr = 1;
 
 % cv can take 0,1,2
 % cv = 0 -> training on complete data and testing on test data
@@ -86,6 +86,8 @@ pho_svm = cell(3,1);
 % final predictions are stored in this
 predicted_dg_lin = cell(3,1);
 predicted_dg_svm = cell(3,1);
+
+svmmodel = cell(3,5);
 
 %% Step 3: Get all the Features
 % todo:
@@ -196,7 +198,7 @@ for patient = 1:3
     if dosvr
     % SVR
     for finger = 1:5
-    [model, a, b] = svm(config, patient, finger, 1, numpredictions);
+    [svmmodel{patient}{finger}, a, b] = svm(config, patient, finger, 1, numpredictions);
     predicted_dg_svm{patient}(1:147500,finger) = a;
     pho_svm{patient}(1,finger) = b;
     end 
@@ -220,8 +222,8 @@ for patient = 1:3
     if dosvr
     % SVR
     for finger = 1:5
-    [model, a, b] = svm(config, patient, finger, 1,  numpredictions);
-    predicted_dg_svm{patient}(1:147500,finger) = a;
+    [svmmodel{patient}{finger}, a, b] = svm(config, patient, finger, 1,  numpredictions);
+    predicted_dg_svm{patient}(1:numpredictions,finger) = a;
     pho_svm{patient}(1,finger) = b;
     end 
     end
@@ -247,8 +249,8 @@ for patient = 1:3
     if dosvr
     % SVR
     for finger = 1:5
-    [model, a, b] = svm(config, patient, finger, 1,  numpredictions);
-    predicted_dg_svm{patient}(1:147500,finger) = a;
+    [svmmodel{patient}{finger}, a, b] = svm(config, patient, finger, 1,  numpredictions);
+    predicted_dg_svm{patient}(1:numpredictions,finger) = a;
     pho_svm{patient}(1,finger) = b;
     end 
     end
