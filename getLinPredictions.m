@@ -24,8 +24,8 @@ end
 
 finalpredictions = predictions;
 
-%dummy rho
-rho = -1;
+
+
 
 y_test = tl.(strcat('y_test_',num2str(patient)));
 
@@ -47,11 +47,11 @@ if(y_test~=-1)
     rho{3} = corr(y_test(:,3),finalpredictions(:,3));
     rho{4} = corr(y_test(:,4),finalpredictions(:,4));
     rho{5} = corr(y_test(:,5),finalpredictions(:,5));
-    
+
+elseif y_test==-1
+    rho = -1;
+
 end
-
-
-
-
+    
 end
 
