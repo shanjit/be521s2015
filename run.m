@@ -8,8 +8,8 @@ close all;
 
 recalculateFeatures = 1;
 doplot = 0;
-dolinearreg = 0;
-dosvr = 1;
+dolinearreg = 1;
+dosvr = 0;
 dolasso = 0;
 
 % cv can take 0,1,2
@@ -207,6 +207,20 @@ if (cv==0)
             end
         end
         
+        if dolasso
+            
+           for finger = [1,2,3,5]
+                finger
+                
+               %[a,lambda1] = lassopred(config, patient, finger, 0, numpredictions); 
+               %lambda{patient,finger} = lambda1;
+               
+               [prediction] = lassopred(config, patient, finger, 0, numpredictions);
+               predicted_dg_lasso{patient}(1:numpredictions,finger) = prediction;
+           end
+            
+        end
+        
         
     end
     
@@ -236,11 +250,12 @@ elseif (cv==1)
     tempmean = [mean(cell2mat(pho{1})) mean(cell2mat(pho{2})) mean(cell2mat(pho{3}))];
     corr = mean(tempmean);
     
+    lambda = cell{3,5};
     
     % cv = 2 -> getting the training error when trained on complete data and
     % testing on complete data
 elseif (cv==2)
-    for patient = 1:1
+    for patient = 1:3
         
         % number of predictions
         numpredictions = 310000;
@@ -261,20 +276,23 @@ elseif (cv==2)
         
         if dolasso
             
-           for finger = 1:1
+           for finger = [1,2,3,5]
+                finger
+                
+               %[a,lambda1] = lassopred(config, patient, finger, 0, numpredictions); 
+               %lambda{patient,finger} = lambda1;
                
-              a = lassopred(config, patient, finger, 1, numpredictions); 
-              predicted_dg_lasso{patient}(1:numpredictions, finger) = a;
-              
+               [prediction] = lassopred(config, patient, finger, 0, numpredictions);
+               predicted_dg_lasso{patient}(1:numpredictions,finger) = prediction;
            end
             
         end
         
     end
     
-    pho = pho_lin;
-    tempmean = [mean(cell2mat(pho{1})) mean(cell2mat(pho{2})) mean(cell2mat(pho{3}))];
-    corr = mean(tempmean);
+%     pho = pho_lin;
+%     tempmean = [mean(cell2mat(pho{1})) mean(cell2mat(pho{2})) mean(cell2mat(pho{3}))];
+%     corr = mean(tempmean);
     
 end
 

@@ -1,7 +1,7 @@
 % lasso predictions
 
 
-function [predictions] = lassopred(config, patient, finger, calclasso, numpredictions)
+function [finalpredictions, RetFitInfo] = lassopred(config, patient, finger, calclasso, numpredictions)
 
 if(calclasso==1)
     disp('Recalculating Lasso Lambda models.');
@@ -18,45 +18,110 @@ if(calclasso==1)
     [learn, val] = kfolds(data,nfolds);
     
     
+    %
+    predictions = -1;
+    arr = cell(3,1);
+    %
     for i=1:nfolds
-        
+        %
         lrndata.X = learn{i}(:, 2:end);
         lrndata.y = learn{i}(:, 1);
         valdata.X = val{i}(:, 2:end);
         valdata.y = val{i}(:, 1);
+        %
+        [B, FitInfo] = lasso(lrndata.X, lrndata.y);
         
-        size(lrndata.X)
-        size(lrndata.y)
-        [B, FitInfo] = lasso(lrndata.X, lrndata.y, 'CV', 3);
-        
-        train_predict = lrndata.X * B;
-        val_predict = valdata.X * B;
+        arr{i} = FitInfo;
         
         
-        for i=size(train_predict,2)
-            train_predict(:,i)=train_predict(:,i)+FitInfo.Intercept(i);
-        end
-        RHO = corr(train_predict,lrndata.y)
-        figure()
-        plot(FitInfo.DF,RHO);
         
-        for i=size(val_predict,2)
-            val_predict(:,i)=val_predict(:,i)+FitInfo.Intercept(i);
-        end
-        RHO = corr(val_predict,valdata.y)
-        figure()
-        plot(FitInfo.DF,RHO);
+        %         train_predict = lrndata.X * B;
+        %         val_predict = valdata.X * B;
+        %
+        %
+        %         for i=size(train_predict,2)
+        %             train_predict(:,i)=train_predict(:,i)+FitInfo.Intercept(i);
+        %         end
+        %
+        %         RHO = corr(train_predict,lrndata.y);
+        %
+        %         figure()
+        %         plot(FitInfo.DF,RHO, 'b');
+        %         hold on;
+        %         for i=size(val_predict,2)
+        %             val_predict(:,i)=val_predict(:,i)+FitInfo.Intercept(i);
+        %         end
+        %         RHO = corr(val_predict,valdata.y);
+        %
+        %         figure()
+        %         plot(FitInfo.DF,RHO,'r');
+        
         
         % calculate the value of lambda
         
     end
     
+    RetFitInfo = arr;
+    
+    
+elseif(calclasso==0)
+    disp('NOT Recalculating Lasso Lambda models.');
+    tl = load(strcat('x_train_',num2str(patient)));
+    td = load(strcat('x_test_',num2str(patient)));
+    
+    load('optimallambdalasso');
+    
+    x_train = tl.(strcat('x_train_',num2str(patient)));
+    y_train = tl.(strcat('y_train_',num2str(patient)));
+    
+    
+    x_test = td.(strcat('x_test_',num2str(patient)));
+    
+    
+    y_train = y_train(:,finger);
+    
+    [B, FitInfo] = lasso(x_train, y_train,'lambda',optimallambda(patient,finger));
+    u = x_test*B;
+    
+    noverlap = config.('noverlap');
+    totalSize = numpredictions;
+    N = config.('history');
+    
+    u = [zeros(max(N),1); u; zeros(1,1)];
+    x = size(u,1);
+    temp1 = (1:x)*(noverlap/1000);
+    
+    temp2 = (1:totalSize)*(1/1000);
+    
+    for i = 1:1
+        predictions(:,i) = spline(temp1,u(:,i),temp2)';
+%         
+%         
+%         a = lpc(predictions(:,i),5);
+%         predictions(:,i) = filter([0 -a(2:end)],1,predictions(:,i));
+%         
+        
+        % moving average filter to smooth stuff out
+        predictions(:,i) = smooth(predictions(:,i),20,'moving'); % does rloess make a big difference
+        
+        
+        
+    end
+    
+    finalpredictions = predictions;
+    
+    RetFitInfo = -1;
+    
 end
+
+
+
+
 
 
 % use the most appropriate value of lambda to find the predictions
 
-
+% lambda{patient}(1,1)/(2,1)
 
 
 
