@@ -73,7 +73,9 @@ if (exist('test_data_3.mat','file')~=2)
     % train labels has 310000 samples of 64 channels, we need to predict the
     % labels for this
     close all;
-    clearvars -except username loginfile
+    
+
+
     clc;
 
     session1 = IEEGSession('I521_A0014_D001', username, loginfile);
@@ -88,7 +90,7 @@ if (exist('test_data_3.mat','file')~=2)
     save('train_data_3.mat','train_data_3');
     save('train_labels_3.mat','train_labels_3');
     save('test_data_3.mat','test_data_3');
-    clearvars -except username loginfile
+    clear all;
     clc;
     close all;
     

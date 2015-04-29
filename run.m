@@ -11,6 +11,8 @@ doplot = 0;
 dolinearreg = 1;
 dosvr = 0;
 dolasso = 0;
+cv = 0;
+ratio = 0.95;
 
 % cv can take 0,1,2
 % cv = 0 -> training on complete data and testing on test data
@@ -21,11 +23,9 @@ dolasso = 0;
 % cv = 2 -> getting the training error when trained on complete data and
 % testing on complete data
 
-cv = 0;
-ratio = 0.95;
 
 %% Step 1: Get all the data %%
-getData;
+getData('shanjitsingh', 'login.bin');
 
 
 %% Step 1.2: Visualize the data %%
@@ -90,6 +90,8 @@ pho_lasso = cell(3,1);
 predicted_dg_lin = cell(3,1);
 predicted_dg_svm = cell(3,1);
 predicted_dg_lasso = cell(3,1);
+
+
 svmmodel = cell(3,5);
 
 %% Step 3: Get all the Features

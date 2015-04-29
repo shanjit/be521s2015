@@ -8,6 +8,9 @@
 function[xtrain, ytrain, xtest, ytest] = getFeatures(config, patient, shuffleindices, cv, ratio)
 
 
+%
+% when trainging on the complete data and predicting on the test data given
+% 
 if(cv==0)
    xtrain = tempgetFeatures(config, patient, 'train_data', 1:310000);
    ytrain = tempgetLabels(patient, config, size(xtrain,1), 1:310000);
@@ -15,6 +18,10 @@ if(cv==0)
    ytest =  -1;
    % good to return
    
+%
+% when training on some part of the training data and testing on the unseen
+% data (training data)
+%
 elseif(cv==1)
     xtrain = tempgetFeatures(config, patient, 'train_data', shuffleindices(1:310000*ratio) );
     xtest = tempgetFeatures(config, patient, 'train_data', shuffleindices(1+(310000*ratio):end));
@@ -22,7 +29,10 @@ elseif(cv==1)
     ytrain = tempgetLabels(patient, config, size(xtrain,1), shuffleindices(1:310000*ratio));
     ytest = tempgetLabels(patient, config, size(xtest,1), shuffleindices(1+(310000*ratio):end ));
 
-    
+%
+% when training on the complete data and testing on the complete data for
+% the training error
+%
 elseif(cv==2)
     xtrain = tempgetFeatures(config, patient, 'train_data', 1:310000);
     ytrain = tempgetLabels(patient, config, size(xtrain,1), 1:310000);
@@ -32,9 +42,9 @@ elseif(cv==2)
 end
 
 % matrix normalization and 
-[x_train, x_test] = scaleSVM(xtrain, xtest, xtrain, 0, 1);
-xtrain = x_train(:,2:end);
-xtest = x_test(:,2:end);
+% [x_train, x_test] = scaleSVM(xtrain, xtest, xtrain, 0, 1);
+% xtrain = x_train(:,2:end);
+% xtest = x_test(:,2:end);
 
 end
 

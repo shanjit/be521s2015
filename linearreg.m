@@ -1,4 +1,4 @@
-function [predicted_dg, pho] = linearreg(config, patient,numpredictions)
+function [predicted_dg, weights, pho] = linearreg(config, patient,numpredictions)
 
 weights = getLinWeights(patient);
 
