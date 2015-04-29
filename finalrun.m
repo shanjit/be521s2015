@@ -2,11 +2,11 @@
 
 % new run file to save the drunken electrodes
 
-
 % clean things
 clear all;
 clc;
 close all;
+
 
 %% final weights/models/predictor variables to be saved %%
 % save the final accuracies
@@ -23,8 +23,13 @@ svmmodel = cell(3,5);
 
 %% Set what models are gonna be used for this run %%
 
-% set 1 if you'd want to recalculate the features
+%
+% ONLY VARIABLE TO WORRY ABOUT :)
+%
+% always set recalculate feats unless you run this same file back to back
 recalculatefeats = 1;
+%
+%
 
 % set 1 if you'd want to plot
 doplot = 0;
@@ -147,27 +152,39 @@ disp('Doing predictions now');
 
 
 
-for patient = 1:3
-    
-    % number of predictions
-    numpredictions = 147500;
-    
-    if dolinearreg
-        disp('Doing prediction via linear regression');
+
+
+% number of predictions
+numpredictions = 147500;
+
+if dolinearreg
+    disp('Doing prediction via linear regression');
+    for patient = 1:3
         % linear regression
         load('weight_linreg');
         [predicted_dg_lin{patient},pho_lin{patient}] =  getLinPredictions(config,linweights{patient},patient,numpredictions);
     end
     
-    if dosvr
+    %
+    % change after you make other models
+    %
+    predicted_dg = predicted_dg_lin;
+end
+
+if dosvr
+    for patient = 1:3
         % SVR
         for finger = 1:5
             [svmmodel{patient}{finger}, a, b] = svm(config, patient, finger, 1,  numpredictions);
             predicted_dg_svm{patient}(1:numpredictions,finger) = a;
             pho_svm{patient}(1,finger) = b;
         end
+        
     end
+    
+    % prediction values or whatever
 end
+
 
 % collect individual phos and get the final pho
 %     tempmean = [mean(cell2mat(pho{1})) mean(cell2mat(pho{2})) mean(cell2mat(pho{3}))];
@@ -178,6 +195,4 @@ end
 % cv = 2 -> getting the training error when trained on complete data and
 % testing on complete data
 
-
-predicted_dg = predicted_dg_lin;
 save('predicted_dg.mat', 'predicted_dg');

@@ -1,6 +1,5 @@
 % new run file to save the drunken electrodes
 
-
 % clean things
 clear all;
 clc;
@@ -22,9 +21,6 @@ svmmodel = cell(3,5);
 
 %% Set what models are gonna be used for this run %%
 
-% set 1 if you'd want to recalculate the features
-recalculatefeats = 1;
-
 % set 1 if you'd want to plot
 doplot = 0;
 
@@ -43,10 +39,14 @@ dolasso = 0;
 % CV = 1 -> DEVELOP MODELS AND FIND THE ACCURACY FOR CROSS VALIDATIONS
 % CV = 2 -> DEVELOP MODELS FOR EXPORT TO THE FINALRUN.M FILE
 %
-cv = 2;
-cvchanged = 0;
+cv = 1;
+
+% safe bet keep cvchanged = 1, but if running this file multiple times then
+% cvchanged can be put to zero.
+cvchanged = 1;
+
 % ratio of cross validation
-ratio = 0.95;
+ratio = 0.90;
 
 
 %% Define the configuration to get the R matrix from the raw EEG
@@ -115,8 +115,10 @@ end
 
 % note that CV = 2 for this file always
 
-% get and save all the
-if recalculatefeats
+% NOTE THAT this function needs to be called only once - the cv value will
+% just shufle this and make train and test sets to be used only for this
+% experiment
+if (exist('x_all_3.mat','file')~=2)
     disp('Recalculating all the features');
     
     shuffleindices = randperm(310000);
@@ -249,7 +251,7 @@ elseif (cv==2)
 end
 
 
-if cvchanged ==1
+if cvchanged
     disp('Saving train, tests as CV changed. ');
     save('x_train_1.mat','x_train_1','y_train_1');
     save('x_test_1.mat', 'x_test_1', 'y_test_1');
@@ -279,17 +281,28 @@ disp('Making Models now');
 % cv = 1 -> when training on some parts of training data and testing on
 % unseen parts of the testing data
 if (cv==1)
-    for patient = 1:3
-        
-        % number of predictions
-        numpredictions = 310000*(1.0-ratio);
-        
-        if dolinearreg
+    
+    
+    % number of predictions
+    numpredictions = 310000*(1.0-ratio);
+    
+    if dolinearreg
+        disp('Doing Linear Regression, calculating weights');
+        for patient = 1:3
             % linear regression
-            [predicted_dg_lin{patient},pho_lin{patient}] = linearreg(config, patient, numpredictions);
+            [predicted_dg_lin{patient}, linweights{patient}, pho_lin{patient}] = linearreg(config, patient, numpredictions);
         end
         
-        if dosvr
+        
+        pho = pho_lin;
+        tempmean = [mean(cell2mat(pho_lin{1})) mean(cell2mat(pho_lin{2})) mean(cell2mat(pho{3}))];
+        corr_lin = mean(tempmean);
+        
+        
+    end
+    
+    if dosvr
+        for patient = 1:3
             % SVR
             for finger = 1:5
                 [svmmodel{patient}{finger}, a, b] = svm(config, patient, finger, 1,  numpredictions);
@@ -300,37 +313,50 @@ if (cv==1)
     end
     
     
-    % collect individual phos and get the final pho
-%     tempmean = [mean(cell2mat(pho{1})) mean(cell2mat(pho{2})) mean(cell2mat(pho{3}))];
-%     corr = mean(tempmean);
     
-   
+    % collect individual phos and get the final pho
+    %     tempmean = [mean(cell2mat(pho{1})) mean(cell2mat(pho{2})) mean(cell2mat(pho{3}))];
+    %     corr = mean(tempmean);
+    
+    
     
     % cv = 2 -> getting the training error when trained on complete data and
     % testing on complete data
 elseif (cv==2)
-    for patient = 1:3
-        
-        % number of predictions
-        numpredictions = 310000;
-        
-        if dolinearreg
-            disp('Doing Linear Regression, calculating weights');
+    
+    
+    % number of predictions
+    numpredictions = 310000;
+    
+    if dolinearreg
+        disp('Doing Linear Regression, calculating weights');
+        for patient = 1:3
             % linear regression
             [predicted_dg_lin{patient}, linweights{patient}, pho_lin{patient}] = linearreg(config, patient, numpredictions);
         end
         
-        if dosvr
-            % SVR
+        
+        pho = pho_lin;
+        tempmean = [mean(cell2mat(pho_lin{1})) mean(cell2mat(pho_lin{2})) mean(cell2mat(pho{3}))];
+        corr_lin = mean(tempmean);
+        
+        % save the weights to a file for processing with finalrun.m
+        save('weight_linreg.mat','linweights');
+        
+    end
+    
+    if dosvr
+        for patient=1:3
             for finger = 1:5
                 [svmmodel{patient}{finger}, a, b] = svm(config, patient, finger, 1,  numpredictions);
                 predicted_dg_svm{patient}(1:numpredictions,finger) = a;
                 pho_svm{patient}(1,finger) = b;
             end
         end
-        
-        if dolasso
-            
+    end
+    
+    if dolasso
+        for patient = 1:3
             for finger = [1,2,3,5]
                 finger
                 
@@ -340,13 +366,14 @@ elseif (cv==2)
                 [prediction] = lassopred(config, patient, finger, 0, numpredictions);
                 predicted_dg_lasso{patient}(1:numpredictions,finger) = prediction;
             end
-            
         end
         
     end
     
-    % save the weights for linear regression
-    save('weight_linreg.mat','linweights');
+    
+    
+    
+    
     
     %
     %
