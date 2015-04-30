@@ -1,4 +1,4 @@
-function [trndata,valdata,tstdata,udata]=scaleSVM(trndata,valdata,tstdata,Lower,Upper,udata)
+function [trndata,valdata,tstdata,udata]=featureNorm(trndata,valdata,tstdata,Lower,Upper,udata)
 %--------------------------------------------------------------------------
 % DESCRIPTION: Used to Scale data uniformly
 %--------------------------------------------------------------------------

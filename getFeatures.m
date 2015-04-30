@@ -42,9 +42,11 @@ elseif(cv==2)
 end
 
 % matrix normalization and 
-% [x_train, x_test] = scaleSVM(xtrain, xtest, xtrain, 0, 1);
+% [x_train, x_test] = featureNorm(xtrain, xtest, xtrain, 0, 1);
 % xtrain = x_train(:,2:end);
 % xtest = x_test(:,2:end);
+
+
 
 end
 
