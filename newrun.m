@@ -1,9 +1,9 @@
 % new run file to save the drunken electrodes
 
-function [corr, retweights] = newrun (cv, cvchanged, ratio, dolinearreg, dosvr, dolasso)
+function [corr, retweights] = newrun (cv, cvchanged, recalculatefeats, ratio, dolinearreg, dosvr, dolasso, config)
 
 % clean things
-clearvars -except cv cvchanged ratio dolinearreg dosvr dolasso
+clearvars -except cv cvchanged ratio dolinearreg dosvr dolasso config recalculatefeats
 clc;
 close all;
 
@@ -54,17 +54,17 @@ doplot = 0;
 
 
 %% Define the configuration to get the R matrix from the raw EEG
-% window length in milliseconds
-config.('window') = 100;
-% number of history bits used : n-1 past and current
-config.('history') = 3;
-% overlap time in milliseconds
-config.('noverlap') = 50;
-% total 1024 points
-config.('nfft') = 1024;
-% freqbands used
-config.('freqbands') = [5 15; 20 25; 75 115; 125 160; 160 175];
-config.('fs') = 1000;
+% % window length in milliseconds
+% config.('window') = 100;
+% % number of history bits used : n-1 past and current
+% config.('history') = 3;
+% % overlap time in milliseconds
+% config.('noverlap') = 50;
+% % total 1024 points
+% config.('nfft') = 1024;
+% % freqbands used
+% config.('freqbands') = [5 15; 20 25; 75 115; 125 160; 160 175];
+% config.('fs') = 1000;
 
 
 %% Get all the data from the portal %%
@@ -122,7 +122,7 @@ end
 % NOTE THAT this function needs to be called only once - the cv value will
 % just shufle this and make train and test sets to be used only for this
 % experiment
-if (exist('x_all_3.mat','file')~=2)
+if recalculatefeats
     disp('Recalculating all the features');
     
     shuffleindices = randperm(310000);
