@@ -56,7 +56,10 @@ N = config.('history');
 tl = load(strcat('train_labels_',num2str(patient)));
 train_labels   = tl.(strcat('train_labels_',num2str(patient)));    
 
-train_labels = train_labels(shuffleindices, :);
+%%%% NO SHUFFLING OF THE RAW EEG %%%% 
+%%%%                             %%%%
+% uncomment the line below for shuffling if needed
+%train_labels = train_labels(shuffleindices, :);
 
 
 train1 = decimate(train_labels(:,1),noverlap);
@@ -104,7 +107,11 @@ td = load(strcat(str,num2str(patient)));
 % data is samples x channel number
 data = td.(strcat(str,num2str(patient)));
 
-data = data(shuffleindices,:);
+
+%%%% NO SHUFFLING OF THE RAW EEG %%%% 
+%%%%                             %%%%
+% uncomment the line below for shuffling if needed
+%data = data(shuffleindices,:);
 
 
 % clear unnecessary variables

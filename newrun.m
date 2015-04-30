@@ -1,6 +1,6 @@
 % new run file to save the drunken electrodes
 
-function [corr, retweights] = newrun (cv, cvchanged, recalculatefeats, ratio, dolinearreg, dosvr, dolasso, config)
+function [corr, retweights] = newrun (cv, ratio, dolinearreg, dosvr, dolasso, config)
 
 % clean things
 clearvars -except cv cvchanged ratio dolinearreg dosvr dolasso config recalculatefeats
@@ -30,13 +30,13 @@ doplot = 0;
 
 % % set 1 if you'd want to use only linearreg
 % dolinearreg = 1;
-% 
+%
 % % set 1 if you'd want to use only svr
 % dosvr = 0;
-% 
+%
 % % set 1 if you'd want to use only lasso
 % dolasso = 0;
-% 
+%
 % %
 % % CV SHOULD ONLY BE 1 OR 2 IN THIS FILE NOT 0!
 % %
@@ -44,11 +44,11 @@ doplot = 0;
 % % CV = 2 -> DEVELOP MODELS FOR EXPORT TO THE FINALRUN.M FILE
 % %
 % cv = 1;
-% 
+%
 % % safe bet keep cvchanged = 1, but if running this file multiple times then
 % % cvchanged can be put to zero.
 % cvchanged = 1;
-% 
+%
 % % ratio of cross validation
 % ratio = 0.90;
 
@@ -122,9 +122,11 @@ end
 % NOTE THAT this function needs to be called only once - the cv value will
 % just shufle this and make train and test sets to be used only for this
 % experiment
-if recalculatefeats
+if (exist('x_all_3.mat','file')~=2)
     disp('Recalculating all the features');
     
+    % nothing happens with this shuffleindices - use this only when you
+    % want to shuffle the raw eeg signals before making the r matrix
     shuffleindices = randperm(310000);
     [x_train_1, y_train_1] = getFeatures(config, 1, shuffleindices, cv, ratio);
     save('x_all_1.mat','x_train_1','y_train_1');
@@ -149,8 +151,19 @@ clearvars x_train_1 y_train_1 x_train_2 y_train_2 x_train_3 y_train_3 x_test_1 x
 % CV = 1 -> DEVELOP MODELS AND FIND THE ACCURACY FOR CROSS VALIDATIONS
 % CV = 2 -> DEVELOP MODELS FOR EXPORT TO THE FINALRUN.M FILE
 %
+
+
+load('x_all_1');
+load('x_all_2');
+load('x_all_3');
+
+% after this step x_train_*, y_train_* and x_test_* and y_test_* are in the
+% workspace. 
+
+
+
 if (cv==1)
-    load('x_all_1');
+    
     %sizex_train_1 = size(x_train_1);
     shuffleindices = randperm(size(x_train_1,1));
     tempxtrain = x_train_1(shuffleindices(1:floor(size(x_train_1,1)*ratio)),:);
@@ -168,7 +181,7 @@ if (cv==1)
     clearvars tempxtrain tempytrain tempxtest tempytest
     
     
-    load('x_all_2');
+    
     %sizex_train_2 = size(x_train_2);
     shuffleindices = randperm(size(x_train_2,1));
     tempxtrain = x_train_2(shuffleindices(1:floor(size(x_train_2,1)*ratio)),:);
@@ -185,7 +198,7 @@ if (cv==1)
     
     clearvars tempxtrain tempytrain tempxtest tempytest
     
-    load('x_all_3');
+    
     %sizex_train_3 = size(x_train_3);
     shuffleindices = randperm(size(x_train_3,1));
     tempxtrain = x_train_3(shuffleindices(1:floor(size(x_train_3,1)*ratio)),:);
@@ -204,7 +217,6 @@ if (cv==1)
     
     
 elseif (cv==2)
-    load('x_all_1');
     tempxtrain = x_train_1;
     tempxtest = x_train_1;
     
@@ -219,7 +231,7 @@ elseif (cv==2)
     
     clearvars tempxtrain tempytrain tempxtest tempytest
     
-    load('x_all_2');
+    
     tempxtrain = x_train_2;
     tempxtest = x_train_2;
     
@@ -235,7 +247,7 @@ elseif (cv==2)
     clearvars tempxtrain tempytrain tempxtest tempytest
     
     
-    load('x_all_3');
+    
     tempxtrain = x_train_3;
     tempxtest = x_train_3;
     
@@ -255,22 +267,17 @@ elseif (cv==2)
 end
 
 
-if cvchanged
-    disp('Saving train, tests as CV changed. ');
-    save('x_train_1.mat','x_train_1','y_train_1');
-    save('x_test_1.mat', 'x_test_1', 'y_test_1');
-    
-    save('x_train_2.mat','x_train_2','y_train_2');
-    save('x_test_2.mat', 'x_test_2', 'y_test_2');
-    
-    save('x_train_3.mat','x_train_3','y_train_3');
-    save('x_test_3.mat', 'x_test_3', 'y_test_3');
-    
-    clearvars x_train_* x_test_* y_train_* y_test_*
-    
-else
-    disp('Not saving train, tests as CV not changed.');
-end
+disp('Saving train, tests as CV changed. ');
+save('x_train_1.mat','x_train_1','y_train_1');
+save('x_test_1.mat', 'x_test_1', 'y_test_1');
+
+save('x_train_2.mat','x_train_2','y_train_2');
+save('x_test_2.mat', 'x_test_2', 'y_test_2');
+
+save('x_train_3.mat','x_train_3','y_train_3');
+save('x_test_3.mat', 'x_test_3', 'y_test_3');
+
+clearvars x_train_* x_test_* y_train_* y_test_*
 
 
 
@@ -285,7 +292,6 @@ disp('Making Models now');
 % cv = 1 -> when training on some parts of training data and testing on
 % unseen parts of the testing data
 if (cv==1)
-    
     
     % number of predictions
     numpredictions = 310000*(1.0-ratio);
@@ -303,7 +309,7 @@ if (cv==1)
         corr_lin = mean(tempmean);
         corr.('crosslinreg') = corr_lin;
         retweights.('crosslinreg') = linweights;
-
+        
         
     end
     
@@ -316,13 +322,13 @@ if (cv==1)
                 pho_svm{patient}(1,finger) = b;
             end
         end
-%         tempmean = [mean(cell2mat(pho_svm{1})) mean(cell2mat(pho_svm{2})) mean(cell2mat(pho_svm{3}))];
-%         corr_svm = mean(tempmean);
-%         corr.('crosssvm') = corr_svm;
+        %         tempmean = [mean(cell2mat(pho_svm{1})) mean(cell2mat(pho_svm{2})) mean(cell2mat(pho_svm{3}))];
+        %         corr_svm = mean(tempmean);
+        %         corr.('crosssvm') = corr_svm;
         % retweights.('crossvm') = weights;
     end
     
-
+    
     if dolasso
         for patient = 1:3
             for finger = [1,2,3,5]
@@ -336,10 +342,10 @@ if (cv==1)
             end
         end
         
-%         tempmean = [mean(cell2mat(pho_svm{1})) mean(cell2mat(pho_svm{2})) mean(cell2mat(pho_svm{3}))];
-%         corr_svm = mean(tempmean);
-%         corr('trainlasso') = corr_lasso;
-%         retweights('trainlasso') = lassoweights;
+        %         tempmean = [mean(cell2mat(pho_svm{1})) mean(cell2mat(pho_svm{2})) mean(cell2mat(pho_svm{3}))];
+        %         corr_svm = mean(tempmean);
+        %         corr('trainlasso') = corr_lasso;
+        %         retweights('trainlasso') = lassoweights;
         
     end
     
@@ -371,7 +377,7 @@ elseif (cv==2)
         corr_lin = mean(tempmean);
         corr.('trainlinreg') = corr_lin;
         retweights.('trainlinreg') = linweights;
-
+        
         % save the weights to a file for processing with finalrun.m
         % save('weight_linreg.mat','linweights');
         
@@ -404,10 +410,10 @@ elseif (cv==2)
             end
         end
         
-%         tempmean = [mean(cell2mat(pho_svm{1})) mean(cell2mat(pho_svm{2})) mean(cell2mat(pho_svm{3}))];
-%         corr_svm = mean(tempmean);
-%         corr.('trainlasso') = corr_lasso;
-%         retweights.('trainlasso') = lassoweights;
+        %         tempmean = [mean(cell2mat(pho_svm{1})) mean(cell2mat(pho_svm{2})) mean(cell2mat(pho_svm{3}))];
+        %         corr_svm = mean(tempmean);
+        %         corr.('trainlasso') = corr_lasso;
+        %         retweights.('trainlasso') = lassoweights;
         
     end
     
@@ -424,7 +430,7 @@ elseif (cv==2)
     %     corr = mean(tempmean);
     
 end
-% 
+%
 % predicted_dg = predicted_dg_lin;
 % save('predicted_dg.mat', 'predicted_dg');
 
