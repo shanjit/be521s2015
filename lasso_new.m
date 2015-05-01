@@ -47,7 +47,7 @@ for finger_index = 1:5
     for B_index = 1:size(B,2)
         % predictions
         pred_y = x_test * B(:,B_index) + intercept(B_index); 
-        % correlations
+        % correlations - ERROR: size difference 
         corr_lasso(B_index) = corr(y_test,pred_y); 
     end
     
@@ -57,7 +57,8 @@ for finger_index = 1:5
     % finding best model
     lassoweights(:,finger_index) = B(:,pho_lasso(finger_index));
     
-    % predictions
+    % predictions - x_test = test_data_1 for patient 1 ??? if yes, then
+    % how to match lassoweight dimensions to it ?
     predicted_dg_lasso(:,finger_index) = x_test * lassoweights(:,finger_index);
     
 end
