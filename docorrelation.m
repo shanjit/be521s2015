@@ -1,6 +1,20 @@
-% correlation file
+% Correlation file
+%
+% with cv = 1, this will dump correlations and help with parameter
+% selection
+%
+% with cv = 2, this will make final weights and models to be imported into
+% finalrun.m file to get the predictions for the test_data.
+%
+% with cv = 3, you are making final predictions to be uploaded online. you
+% should be uploading predicted_dg.mat online.
+%
+%
+% NOTE: Please run cv = 1 then cv = 2 and then cv = 3 
+%
+%
 
-cv = 1;
+cv = 3;
 
 % window length in milliseconds
 config.('window') = 100;
@@ -14,6 +28,11 @@ config.('nfft') = 1024;
 config.('freqbands') = [5 15; 20 25; 75 115; 125 160; 160 175];
 config.('fs') = 1000;
 
+
+
+
+
+
 if cv==1
     nooftimecv = 5;
     corr = cell(nooftimecv, 1);
@@ -22,11 +41,13 @@ if cv==1
     
     %
     % deleting x_all_3.mat forces newrun to evaluate the features atleast
-    % once all over again. 
+    % once all over again.
     %
     % this ensures that you are dealing with the latest features always
     %
     delete('x_all_3.mat');
+    
+    
     [corr{i}, weights{i}] =  newrun(cv, 0.95, 1, 0, 0, config);
     % do cross validation for linear regression
     for i=2:nooftimecv
@@ -39,15 +60,18 @@ if cv==1
     sum = 0;
     for i=1:nooftimecv
         % don't use abs, either all signs should be - or all +, if mixed
-        % then things are wrong! 
+        % then things are wrong!
         % sum = sum + abs(corr{i}.crosslinreg);
         sum = sum + corr{i}.crosslinreg;
     end
     
     meancrosslinreg = sum/nooftimecv;
     
-else
+elseif cv==2
     
     [corr, weights] = newrun(cv, 0, 1, 0, 0, config)
     
+elseif cv==3
+    
+    finalrun(config, 1, 0, 0);
 end

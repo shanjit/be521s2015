@@ -1,4 +1,12 @@
 README for the BE521 Project
 ============================
 
-Just run run.m file 
+The aim of the project is to make models (get weights, parameters for 
+models) so that a final prediction on the testing set can be done.
+
+The docorrelation file (with variable cv=1) needs to be run to check 
+if the models give a good cross validation error or not. With cv=2, 
+the docorrelation file will save the final models which finalrun.m 
+file takes to make prediction on the test_data.
+
+
