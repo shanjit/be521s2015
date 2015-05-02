@@ -37,12 +37,8 @@ config.('fs') = 1000;
     %
     
     
-    %delete('x_all_3.mat');
-    
-    
-
-
-
+    delete('x_all_3.mat');
+   
 
 if cv==1
     nooftimecv = 2;
@@ -50,16 +46,14 @@ if cv==1
     weights = cell(nooftimecv, 1);
     i=1;
     
-
-    
-    
     [corr{i}, weights{i}] =  newrun(cv, 0.95, 0, 0, 0, 1, config);
+    
     % do cross validation for linear regression
     for i=2:nooftimecv
         % (cv, ratio, dolinearreg, dosvr, dolasso, config)
         [corr{i}, weights{i}] =  newrun(cv, 0.95, 0, 0, 0, 1, config);
-        corr{i} .crosslinreg
-        pause(5);
+        
+       
     end
     
     sum = 0;

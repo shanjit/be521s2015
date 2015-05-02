@@ -12,6 +12,7 @@ close all;
 pho_lin = cell(3,1);
 pho_svm = cell(3,1);
 pho_lasso = cell(3,1);
+pho_fingclass = cell(3,1);
 
 % final predictions are stored in this
 predicted_dg_lin = cell(3,1);
@@ -88,7 +89,6 @@ if doplot==1
     subplot(2,1,2);
     plot(train_labels_1);
     
-    
     load('train_data_2');
     load('train_labels_2');
     figure(2)
@@ -128,14 +128,20 @@ if (exist('x_all_3.mat','file')~=2)
     % nothing happens with this shuffleindices - use this only when you
     % want to shuffle the raw eeg signals before making the r matrix
     shuffleindices = randperm(310000);
-    [x_train_1, y_train_1] = getFeatures(config, 1, shuffleindices, cv, ratio);
-    save('x_all_1.mat','x_train_1','y_train_1');
+    [x_train_1, y_train_1, finger_train_1] = getFeatures(config, 1, shuffleindices, cv, ratio);
     
-    [x_train_2, y_train_2] = getFeatures(config, 2, shuffleindices, cv, ratio);
-    save('x_all_2.mat','x_train_2','y_train_2');
     
-    [x_train_3, y_train_3] = getFeatures(config, 3, shuffleindices, cv, ratio);
-    save('x_all_3.mat','x_train_3','y_train_3');
+    save('x_all_1.mat','x_train_1','y_train_1', 'finger_train_1');
+    
+    [x_train_2, y_train_2, finger_train_2] = getFeatures(config, 2, shuffleindices, cv, ratio);
+    save('x_all_2.mat','x_train_2','y_train_2', 'finger_train_2');
+    
+    
+    
+    [x_train_3, y_train_3, finger_train_3] = getFeatures(config, 3, shuffleindices, cv, ratio);
+    
+    
+    save('x_all_3.mat','x_train_3','y_train_3', 'finger_train_3');
     
     
 else
@@ -174,13 +180,22 @@ if (cv==1)
     tempytrain = y_train_1(shuffleindices(1:floor(size(x_train_1,1)*ratio)),:);
     tempytest = y_train_1(shuffleindices(1+floor(size(x_train_1,1)*ratio):end),:);
     
+    tempfingertrain = finger_train_1(shuffleindices(1:floor(size(x_train_1,1)*ratio)),:);
+    tempfingertest = finger_train_1(shuffleindices(1+floor(size(x_train_1,1)*ratio):end),:);
+    
+    finger_train_1 = tempfingertrain;
+    finger_test_1 = tempfingertest;
+    
+    
     x_train_1 = tempxtrain;
     x_test_1 = tempxtest;
     
     y_train_1 = tempytrain;
     y_test_1 = tempytest;
     
-    clearvars tempxtrain tempytrain tempxtest tempytest
+    
+    
+    clearvars tempxtrain tempytrain tempxtest tempytest tempfingertest tempfingertrain
     
     
     
@@ -192,13 +207,22 @@ if (cv==1)
     tempytrain = y_train_2(shuffleindices(1:floor(size(x_train_2,1)*ratio)),:);
     tempytest = y_train_2(shuffleindices(1+floor(size(x_train_2,1)*ratio):end),:);
     
+    
+    tempfingertrain = finger_train_2(shuffleindices(1:floor(size(x_train_2,1)*ratio)),:);
+    tempfingertest = finger_train_2(shuffleindices(1+floor(size(x_train_2,1)*ratio):end),:);
+    
+    
     x_train_2 = tempxtrain;
     x_test_2 = tempxtest;
     
     y_train_2 = tempytrain;
     y_test_2 = tempytest;
+
+    finger_train_2 = tempfingertrain;
+    finger_test_2 = tempfingertest;
     
-    clearvars tempxtrain tempytrain tempxtest tempytest
+    clearvars tempxtrain tempytrain tempxtest tempytest tempfingertest tempfingertrain
+    
     
     
     %sizex_train_3 = size(x_train_3);
@@ -209,21 +233,33 @@ if (cv==1)
     tempytrain = y_train_3(shuffleindices(1:floor(size(x_train_3,1)*ratio)),:);
     tempytest = y_train_3(shuffleindices(1+floor(size(x_train_3,1)*ratio):end),:);
     
+    tempfingertrain = finger_train_3(shuffleindices(1:floor(size(x_train_3,1)*ratio)),:);
+    tempfingertest = finger_train_3(shuffleindices(1+floor(size(x_train_3,1)*ratio):end),:);
+    
+    
     x_train_3 = tempxtrain;
     x_test_3 = tempxtest;
     
     y_train_3 = tempytrain;
     y_test_3 = tempytest;
     
-    clearvars tempxtrain tempytrain tempxtest tempytest
+    finger_train_3 = tempfingertrain;
+    finger_test_3 = tempfingertest;
+    
+    
+    clearvars tempxtrain tempytrain tempxtest tempytest tempfingertest tempfingertrain
     
     
 elseif (cv==2)
     tempxtrain = x_train_1;
     tempxtest = x_train_1;
     
+    
     tempytrain = y_train_1;
     tempytest = y_train_1;
+    
+    tempfingertrain = finger_train_1;
+    tempfingertest = finger_test_1;
     
     x_train_1 = tempxtrain;
     x_test_1 = tempxtest;
@@ -231,7 +267,11 @@ elseif (cv==2)
     y_train_1 = tempytrain;
     y_test_1 = tempytest;
     
-    clearvars tempxtrain tempytrain tempxtest tempytest
+    
+    finger_train_1 = tempfingertrain;
+    finger_test_1 = tempfingertest;
+    
+    clearvars tempxtrain tempytrain tempxtest tempytest tempfingertest tempfingertrain
     
     
     tempxtrain = x_train_2;
@@ -240,13 +280,23 @@ elseif (cv==2)
     tempytrain = y_train_2;
     tempytest = y_train_2;
     
+    
+    tempfingertrain = finger_train_2;
+    tempfingertest = finger_test_2;
+    
+    
     x_train_2 = tempxtrain;
     x_test_2 = tempxtest;
     
     y_train_2 = tempytrain;
     y_test_2 = tempytest;
     
-    clearvars tempxtrain tempytrain tempxtest tempytest
+    
+    
+    finger_train_2 = tempfingertrain;
+    finger_test_2 = tempfingertest;
+    
+    clearvars tempxtrain tempytrain tempxtest tempytest tempfingertest tempfingertrain
     
     
     
@@ -256,6 +306,11 @@ elseif (cv==2)
     tempytrain = y_train_3;
     tempytest = y_train_3;
     
+    
+    tempfingertrain = finger_train_3;
+    tempfingertest = finger_test_3;
+    
+    
     x_train_3 = tempxtrain;
     x_test_3 = tempxtest;
     
@@ -263,24 +318,30 @@ elseif (cv==2)
     y_test_3 = tempytest;
     
     
-    clearvars tempxtrain tempytrain tempxtest tempytest
     
+    finger_train_3 = tempfingertrain;
+    finger_test_3 = tempfingertest;
+    
+    
+    clearvars tempxtrain tempytrain tempxtest tempytest tempfingertest tempfingertrain
     
 end
 
 
+%SAVE REGARDLESS OF WHETHER IF CV=1 or CV=22
+
 disp('Saving train, tests as CV changed. ');
 
-save('x_train_1.mat','x_train_1','y_train_1');
-save('x_test_1.mat', 'x_test_1', 'y_test_1');
+save('x_train_1.mat','x_train_1','y_train_1', 'finger_train_1');
+save('x_test_1.mat', 'x_test_1', 'y_test_1', 'finger_test_1');
 
-save('x_train_2.mat','x_train_2','y_train_2');
-save('x_test_2.mat', 'x_test_2', 'y_test_2');
+save('x_train_2.mat','x_train_2','y_train_2', 'finger_train_2');
+save('x_test_2.mat', 'x_test_2', 'y_test_2', 'finger_test_2');
 
-save('x_train_3.mat','x_train_3','y_train_3');
-save('x_test_3.mat', 'x_test_3', 'y_test_3');
+save('x_train_3.mat','x_train_3','y_train_3', 'finger_train_3');
+save('x_test_3.mat', 'x_test_3', 'y_test_3', 'finger_test_3');
 
-clearvars x_train_* x_test_* y_train_* y_test_*
+clearvars x_train_* x_test_* y_train_* y_test_* finger_t*
 
 
 
@@ -289,7 +350,10 @@ disp('Making Models now');
 % At this point, there are x_train, y_train variables saved in
 % x_train_<patient_no> and x_test, y_test variables saved in
 % y_test_<patient_no>
-
+%
+% x_train_<patient> / x_test_<patient> 
+% y_train_<patient> / y_train_<patient>
+% finger_train_<patient> / finger_test_<patient>
 
 
 
@@ -325,7 +389,7 @@ if (cv==1)
             for finger = 1:5
                 [svmmodel{patient}{finger}, a, b] = svm(config, patient, finger, 1,  numpredictions);
                 predicted_dg_svm{patient}(1:numpredictions,finger) = a;
-                pho_svm{patient}(1,finger) = b;
+                pho_s   vm{patient}(1,finger) = b;
             end
         end
         %         tempmean = [mean(cell2mat(pho_svm{1})) mean(cell2mat(pho_svm{2})) mean(cell2mat(pho_svm{3}))];
@@ -359,14 +423,18 @@ if (cv==1)
     % use this classification to finally change the
     
     if dofingerclass
+        disp('Doing finger classification');
         for patient = 1:3
-            [predicted_dg_lin{patient}] =  fingerclassification(config,patient);
-            
-            
+            [predicted_dg_fingclass{patient}, pho_fingclass{patient}] =  fingerclassification(config,patient);
         end
         
+        tempmean = [mean(cell2mat(pho_fingclass{1})) mean(cell2mat(pho_fingclass{2})) mean(cell2mat(pho_fingclass{3}))];
+        corr_fingclass = mean(tempmean);
+        corr.('crossfingclass') = corr_lin;
+        retweights.('crossfingclass') = -1;
         
         
+       
         
     end
     
@@ -459,5 +527,8 @@ end
 %
 % predicted_dg = predicted_dg_lin;
 % save('predicted_dg.mat', 'predicted_dg');
+
+corr.('def') = -1;
+retweights.('def')= -1;
 
 end

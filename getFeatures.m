@@ -5,7 +5,7 @@
 % the files.
 
 
-function[xtrain, ytrain, xtest, ytest] = getFeatures(config, patient, shuffleindices, cv, ratio)
+function[xtrain, ytrain, fingerlabeltrain] = getFeatures(config, patient, shuffleindices, cv, ratio)
 
 
 %
@@ -13,9 +13,10 @@ function[xtrain, ytrain, xtest, ytest] = getFeatures(config, patient, shuffleind
 % 
 if(cv==0)
    xtrain = tempgetFeatures(config, patient, 'train_data', 1:310000);
-   ytrain = tempgetLabels(patient, config, size(xtrain,1), 1:310000);
+   [ytrain, fingerlabeltrain] = tempgetLabels(patient, config, size(xtrain,1), 1:310000);
    xtest =  tempgetFeatures(config, patient, 'test_data', 1:147500);
    ytest =  -1;
+   
    % good to return
    
 %
@@ -26,8 +27,8 @@ elseif(cv==1)
     xtrain = tempgetFeatures(config, patient, 'train_data', shuffleindices(1:310000*ratio) );
     xtest = tempgetFeatures(config, patient, 'train_data', shuffleindices(1+(310000*ratio):end));
     
-    ytrain = tempgetLabels(patient, config, size(xtrain,1), shuffleindices(1:310000*ratio));
-    ytest = tempgetLabels(patient, config, size(xtest,1), shuffleindices(1+(310000*ratio):end ));
+    [ytrain,fingerlabeltrain] = tempgetLabels(patient, config, size(xtrain,1), shuffleindices(1:310000*ratio));
+    [ytest] = tempgetLabels(patient, config, size(xtest,1), shuffleindices(1+(310000*ratio):end ));
 
 %
 % when training on the complete data and testing on the complete data for
@@ -35,7 +36,7 @@ elseif(cv==1)
 %
 elseif(cv==2)
     xtrain = tempgetFeatures(config, patient, 'train_data', 1:310000);
-    ytrain = tempgetLabels(patient, config, size(xtrain,1), 1:310000);
+    [ytrain, fingerlabeltrain] = tempgetLabels(patient, config, size(xtrain,1), 1:310000);
     xtest = xtrain;
     ytest = ytrain;
    
@@ -50,7 +51,7 @@ end
 
 end
 
-function[ytrain] = tempgetLabels(patient, config, n, shuffleindices)
+function[ytrain, fingerangle] = tempgetLabels(patient, config, n, shuffleindices)
 
 noverlap = config.('noverlap');
 N = config.('history');
@@ -62,6 +63,37 @@ train_labels   = tl.(strcat('train_labels_',num2str(patient)));
 %%%%                             %%%%
 % uncomment the line below for shuffling if needed
 %train_labels = train_labels(shuffleindices, :);
+
+
+%classification of fingers
+meanFeat = @(x) mean(x);
+
+finger1label  = MovingWinFeats(train_labels(:,1), config.('fs'), config.('window')/1000, config.('noverlap')/1000, meanFeat);
+finger2label  = MovingWinFeats(train_labels(:,2), config.('fs'), config.('window')/1000, config.('noverlap')/1000, meanFeat);
+finger3label  = MovingWinFeats(train_labels(:,3), config.('fs'), config.('window')/1000, config.('noverlap')/1000, meanFeat);
+finger4label  = MovingWinFeats(train_labels(:,4), config.('fs'), config.('window')/1000, config.('noverlap')/1000, meanFeat);
+finger5label  = MovingWinFeats(train_labels(:,5), config.('fs'), config.('window')/1000, config.('noverlap')/1000, meanFeat);
+
+finger1label = finger1label>0;
+finger2label = (finger2label>0)*2;
+finger3label = (finger3label>0)*3;
+finger4label = (finger4label>0)*4;
+finger5label = (finger5label>0)*5;
+
+
+% fingerangle is either 0,1,2,3,4,5 refering to which finger was moved
+fingerangle = finger1label+finger2label+finger3label+finger4label+finger5label;
+fingerangle(fingerangle > 5) = 5;
+
+% +finger3label + finger4label + finger5label;
+
+
+fingerangle = fingerangle';
+% fprintf('displaying for patient %d', patient);
+% size(fingerangle)
+fingerangle = fingerangle(max(N)+1:n+max(N),:);
+
+
 
 
 train1 = decimate(train_labels(:,1),noverlap);
