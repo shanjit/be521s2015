@@ -9,7 +9,7 @@
 function [predicted_dg_lasso, lassoweights, pho_lasso] = lasso_new(config, patient, numpredictions)
 
 fprintf('lasso for patient %d\n',patient);
-predicted_dg_lasso = cell(3,1);
+% predicted_dg_lasso = cell(3,1);
 
 % getting data
 tl = load(strcat('x_train_',num2str(patient)));
@@ -53,21 +53,24 @@ for finger_index = 1:5
 %     size(B)
     
     pred_y = zeros(size(x_test,1),1);
-    corr_lasso = zeros(size(B,2),1);
+    corr_lasso = zeros(size(x_test,1),1);
     
     % finding optimal model
     intercept = FitInfo.Intercept;
+%     lambda = FitInfo.Lambda;
+    df = FitInfo.DF;
     
     for B_index = 1:size(B,2)
         % predictions
-        pred_y = x_test * B(:,B_index) + intercept(B_index); 
-        % correlations - ERROR: size difference 
-        corr_lasso(B_index) = corr(y_test_finger,pred_y); 
+        pred_y = x_test * B(:,B_index) + intercept(B_index);
     end
-    
-%     size(corr_lasso)
+%     
+    corr_lasso = corr(y_test_finger,pred_y); 
+    figure()
+    plot(df,corr_lasso)
     
     % finding maximum correlation coefficient
+%     pho_lasso_max_index = find(corr_lasso == max(corr_lasso));
     pho_lasso_max_index = find(corr_lasso == max(corr_lasso));
     pho_lasso{patient}(finger_index) = corr_lasso(pho_lasso_max_index);
     
@@ -76,7 +79,7 @@ for finger_index = 1:5
     
     % predictions - x_test = test_data_1 for patient 1 ??? if yes, then
     % how to match lassoweight dimensions to it ?
-%     predicted_dg_lasso(:,finger_index) = x_test * lassoweights(:,finger_index);
+    predicted_dg_lasso{patient}(:,finger_index) = x_test * lassoweights{patient}(:,finger_index);
     
 end
 

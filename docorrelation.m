@@ -19,21 +19,23 @@ if cv == 1
     corr = cell(nooftimecv, 1);
     weights = cell(nooftimecv, 1);
     i = 1;
-    [corr{i}, weights{i}] =  newrun(cv, 1, 0, 0.95, 0, 0, 1, config);
+    [corr{i}, weights{i}] =  newrun(cv, 1, 1, 0.95, 0, 0, 1, config);
+    corr{i}.crosslasso
+    pause(5);
     % do cross validation for linear regression
-    for i=2:nooftimecv
-        % (cv, cvchanged, recalculatefeats ratio, dolinearreg, dosvr, dolasso, config)
-        [corr{i}, weights{i}] =  newrun(cv, 1, 0, 0.95, 0, 0, 1, config);
-        corr{i}.crosslasso
-        pause(5);
-    end
+%     for i=2:nooftimecv
+%         % (cv, cvchanged, recalculatefeats ratio, dolinearreg, dosvr, dolasso, config)
+%         [corr{i}, weights{i}] =  newrun(cv, 1, 0, 0.95, 0, 0, 1, config);
+%         corr{i}.crosslasso
+%         pause(5);
+%     end
     
-    sum = 0;
-    for i=1:nooftimecv
-        sum = sum + corr{i}.crosslasso;
-    end
-    
-    meancrosslasso = sum/nooftimecv;
+%     sum = 0;
+%     for i=1:nooftimecv
+%         sum = sum + corr{i}.crosslasso;
+%     end
+%     
+%     meancrosslasso = sum/nooftimecv;
     
 else
     
