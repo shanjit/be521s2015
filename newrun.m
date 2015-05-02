@@ -1,9 +1,9 @@
 % new run file to save the drunken electrodes
 
-function [corr, retweights] = newrun (cv, ratio, dolinearreg, dosvr, dolasso, config)
+function [corr, retweights] = newrun (cv, ratio, dolinearreg, dosvr, dolasso, dofingerclass, config)
 
 % clean things
-clearvars -except cv cvchanged ratio dolinearreg dosvr dolasso config recalculatefeats
+clearvars -except cv cvchanged ratio dolinearreg dosvr dolasso config recalculatefeats dofingerclass
 clc;
 close all;
 
@@ -153,12 +153,14 @@ clearvars x_train_1 y_train_1 x_train_2 y_train_2 x_train_3 y_train_3 x_test_1 x
 %
 
 
+
+
 load('x_all_1');
 load('x_all_2');
 load('x_all_3');
 
 % after this step x_train_*, y_train_* and x_test_* and y_test_* are in the
-% workspace. 
+% workspace.
 
 
 
@@ -268,6 +270,7 @@ end
 
 
 disp('Saving train, tests as CV changed. ');
+
 save('x_train_1.mat','x_train_1','y_train_1');
 save('x_test_1.mat', 'x_test_1', 'y_test_1');
 
@@ -289,9 +292,12 @@ disp('Making Models now');
 
 
 
+
 % cv = 1 -> when training on some parts of training data and testing on
 % unseen parts of the testing data
 if (cv==1)
+    
+    
     
     % number of predictions
     numpredictions = 310000*(1.0-ratio);
@@ -349,6 +355,20 @@ if (cv==1)
         
     end
     
+    % classfication 6 way - 0, 1,2,3,4,5
+    % use this classification to finally change the
+    
+    if dofingerclass
+        for patient = 1:3
+            [predicted_dg_lin{patient}] =  fingerclassification(config,patient);
+            
+            
+        end
+        
+        
+        
+        
+    end
     
     % collect individual phos and get the final pho
     %     tempmean = [mean(cell2mat(pho{1})) mean(cell2mat(pho{2})) mean(cell2mat(pho{3}))];
@@ -358,6 +378,12 @@ if (cv==1)
     
     % cv = 2 -> getting the training error when trained on complete data and
     % testing on complete data
+    
+    
+    
+    
+    
+    
 elseif (cv==2)
     
     
@@ -379,7 +405,7 @@ elseif (cv==2)
         retweights.('trainlinreg') = linweights;
         
         % save the weights to a file for processing with finalrun.m
-        % save('weight_linreg.mat','linweights');
+        save('weight_linreg.mat','linweights');
         
     end
     

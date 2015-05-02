@@ -8,6 +8,10 @@ x_test = tl.(strcat('x_test_',num2str(patient)));
 noverlap = config.('noverlap');
 N = config.('history');
 
+
+size(weights);
+size(x_test);
+
 u = x_test*(weights);
 u = [zeros(max(N),5); u; zeros(1,5)];
 x = size(u,1);
@@ -28,7 +32,20 @@ for i = 1:5
     
     
     
+    
 end
+
+% predictions1 = con2seq(predictions);
+% Xi = predictions1(1:20);
+% X = predictions1(20:end);
+% T = predictions1(20:end);
+% net = linearlayer(1:5,0.1);
+% [net,Y] = adapt(net,X,T,Xi);
+% figure()
+% plot(cell2mat(Y),'r');
+% hold on;
+% plot(cell2mat(predictions1),'b');
+
 
 finalpredictions = predictions;
 

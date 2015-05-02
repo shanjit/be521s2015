@@ -4,7 +4,9 @@ NumWins = @(xLen,fs,winLen,winDisp) floor(((xLen) - (winLen*fs))/(winDisp*fs))+1
 i = 1;
 j = fs*winLen;
 
-for n=1:NumWins(length(x),fs, winLen, winDisp)
+numwins = NumWins(length(x),fs, winLen, winDisp);
+
+for n=1:numwins
     Output(1,n)=featFn(x(i:j));
     i= i+fs*winDisp;
     j= j+fs*winDisp;

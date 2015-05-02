@@ -70,6 +70,7 @@ train3 = decimate(train_labels(:,3),noverlap);
 train4 = decimate(train_labels(:,4),noverlap);
 train5 = decimate(train_labels(:,5),noverlap);
 train = [train1 train2 train3 train4 train5];
+
 train = train(max(N)+1:n+max(N),:);
 
 ytrain = train;
@@ -144,6 +145,11 @@ for i = 1:size(data,2)
     %
     %
     
+    
+    %
+    % http://web.media.mit.edu/~cvx/docs/ff.pdf - mentions adding variance
+    % as a feature as well!
+    %
     featurematrix{patient} = [featurematrix{patient} freqfeatures' averagetimevoltage'];
     
     
