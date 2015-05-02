@@ -25,9 +25,6 @@ y_train_finger = zeros(length(y_train),1);
 % finger wise y_test
 y_test_finger = zeros(length(y_test),1);
 
-% pho_lasso = cell(3,1);
-% lassoweights = cell(3,1);
-% predicted_dg_lasso = cell(3,1);
 
 % size(x_train)
 % size(y_train)
@@ -43,7 +40,6 @@ for finger_index = 1:5
     
     y_train_finger = y_train(:,finger_index);
     y_test_finger = y_test(:,finger_index);
-    pho_lasso_max_index = 0;
     
 %     size(y_train_finger)
     
@@ -53,33 +49,31 @@ for finger_index = 1:5
 %     size(B)
     
     pred_y = zeros(size(x_test,1),1);
-    corr_lasso = zeros(size(x_test,1),1);
     
     % finding optimal model
     intercept = FitInfo.Intercept;
-%     lambda = FitInfo.Lambda;
-    df = FitInfo.DF;
+    mse = FitInfo.MSE;
     
     for B_index = 1:size(B,2)
         % predictions
         pred_y = x_test * B(:,B_index) + intercept(B_index);
     end
-%     
-    corr_lasso = corr(y_test_finger,pred_y); 
-    figure()
-    plot(df,corr_lasso)
+
+    RHO = corr(pred_y,y_test_finger); 
+%     figure()
+%     plot(df,corr_lasso)
     
     % finding maximum correlation coefficient
 %     pho_lasso_max_index = find(corr_lasso == max(corr_lasso));
-    pho_lasso_max_index = find(corr_lasso == max(corr_lasso));
-    pho_lasso{patient}(finger_index) = corr_lasso(pho_lasso_max_index);
+    pho_lasso_max_index = find(mse == min(mse));
+    pho_lasso{patient}(finger_index) = RHO;
     
     % finding best model
     lassoweights{patient}(:,finger_index) = B(:,pho_lasso_max_index);
     
     % predictions - x_test = test_data_1 for patient 1 ??? if yes, then
     % how to match lassoweight dimensions to it ?
-    predicted_dg_lasso{patient}(:,finger_index) = x_test * lassoweights{patient}(:,finger_index);
+    predicted_dg_lasso{patient}(:,finger_index) = x_test * lassoweights{patient}(:,finger_index) + intercept;
     
 end
 
