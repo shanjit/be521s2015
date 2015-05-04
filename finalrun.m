@@ -32,7 +32,7 @@ svmmodel = cell(3,5);
 %
 
 % always set recalculate feats unless you run this same file back to back
-recalculatefeats = 0;
+recalculatefeats = 1;
 
 % CV SHOULD ONLY BE 0 IN THIS FILE
 cv = 0;
@@ -84,6 +84,9 @@ disp('Doing predictions now');
 % At this point, there are x_train, y_train variables saved in
 % x_train_<patient_no> and x_test, y_test variables saved in
 % y_test_<patient_no>
+
+% making finger classification now
+%fingermove(config);
 
 
 % number of predictions to be made

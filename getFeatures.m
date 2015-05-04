@@ -137,7 +137,7 @@ for i = 1:size(data,2)
     end
     
     % remember everything is in seconds in the MovingWinFeature
-    averagetimevoltage = MovingWinFeats(data(:,i),1000, window/1000.0, noverlap/1000.0, TimeAvgVolt);
+    averagetimevoltage = MovingWinFeats(data(:,i),fs, window/1000.0, noverlap/1000.0, TimeAvgVolt);
     
     % find more features in the similar fashion
     %
