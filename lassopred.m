@@ -1,7 +1,7 @@
 % lasso predictions
 
 
-function [finalpredictions, RetFitInfo] = lassopred(config, patient, finger, calclasso, numpredictions)
+function [finalpredictions, RetFitInfo] = lassopred(config, patient, finger, intercept, lassoB, numpredictions, calclasso)
 
 if(calclasso==1)
     disp('Recalculating Lasso Lambda models.');
@@ -16,7 +16,6 @@ if(calclasso==1)
     
     data = [y_train, x_train];
     [learn, val] = kfolds(data,nfolds);
-    
     
     %
     predictions = -1;
@@ -33,32 +32,6 @@ if(calclasso==1)
         
         arr{i} = FitInfo;
         
-        
-        
-        %         train_predict = lrndata.X * B;
-        %         val_predict = valdata.X * B;
-        %
-        %
-        %         for i=size(train_predict,2)
-        %             train_predict(:,i)=train_predict(:,i)+FitInfo.Intercept(i);
-        %         end
-        %
-        %         RHO = corr(train_predict,lrndata.y);
-        %
-        %         figure()
-        %         plot(FitInfo.DF,RHO, 'b');
-        %         hold on;
-        %         for i=size(val_predict,2)
-        %             val_predict(:,i)=val_predict(:,i)+FitInfo.Intercept(i);
-        %         end
-        %         RHO = corr(val_predict,valdata.y);
-        %
-        %         figure()
-        %         plot(FitInfo.DF,RHO,'r');
-        
-        
-        % calculate the value of lambda
-        
     end
     
     RetFitInfo = arr;
@@ -66,48 +39,30 @@ if(calclasso==1)
     
 elseif(calclasso==0)
     disp('NOT Recalculating Lasso Lambda models.');
-    tl = load(strcat('x_train_',num2str(patient)));
-    td = load(strcat('x_test_',num2str(patient)));
-    
-    load('optimallambdalasso');
-    
-    x_train = tl.(strcat('x_train_',num2str(patient)));
-    y_train = tl.(strcat('y_train_',num2str(patient)));
-    
-    
-    x_test = td.(strcat('x_test_',num2str(patient)));
-    
-    
-    y_train = y_train(:,finger);
-    
-    [B, FitInfo] = lasso(x_train, y_train,'lambda',optimallambda(patient,finger));
-    u = x_test*B;
-    
     noverlap = config.('noverlap');
     totalSize = numpredictions;
     N = config.('history');
     
-    u = [zeros(max(N),1); u; zeros(1,1)];
-    x = size(u,1);
-    temp1 = (1:x)*(noverlap/1000);
+    str = 'x_test_';
     
-    temp2 = (1:totalSize)*(1/1000);
-    
-    for i = 1:1
-        predictions(:,i) = spline(temp1,u(:,i),temp2)';
-%         
-%         
-%         a = lpc(predictions(:,i),5);
-%         predictions(:,i) = filter([0 -a(2:end)],1,predictions(:,i));
-%         
+    tl = load(strcat(str,num2str(patient)));
+    x_test = tl.(strcat(str,num2str(patient)));
+
+        u = (x_test*lassoB{patient,finger}) + intercept{patient,finger}
+        u = [zeros(max(N),1); u; zeros(1,1)];
+        x = size(u,1);
+        temp1 = (1:x)*(noverlap/1000);
         
-        % moving average filter to smooth stuff out
-        predictions(:,i) = smooth(predictions(:,i),20,'moving'); % does rloess make a big difference
+        temp2 = (1:totalSize)*(1/1000);
         
+        for i = 1:1
+            predictions(:,i) = spline(temp1,u(:,i),temp2)';
+            
+            predictions(:,i) = smooth(predictions(:,i),20,'moving'); % does rloess make a big difference
+            
+        end
         
-        
-    end
-    
+
     finalpredictions = predictions;
     
     RetFitInfo = -1;

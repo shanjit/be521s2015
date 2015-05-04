@@ -34,7 +34,7 @@ config.('fs') = 1000;
 
 
 if cv==1
-    nooftimecv = 5;
+    nooftimecv = 1;
     corr = cell(nooftimecv, 1);
     weights = cell(nooftimecv, 1);
     i=1;
@@ -73,5 +73,5 @@ elseif cv==2
     
 elseif cv==3
     
-    finalrun(config, 1, 0, 0);
+    finalrun(config, 1, 0, 1, 1);
 end
