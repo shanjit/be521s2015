@@ -34,8 +34,8 @@ finalpredictions = predictions;
 
 
 
-
-y_test = tl.(strcat('y_test_',num2str(patient)));
+y_test = -1;
+% y_test = tl.(strcat('y_test_',num2str(patient)));
 
 if(y_test~=-1)
     u = y_test;

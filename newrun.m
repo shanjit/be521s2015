@@ -332,7 +332,7 @@ if (cv==1)
     if dolasso
         for patient = 1:3
             for finger = [1,2,3,5]
-                finger
+                finger;
                 
                 %[a,lambda1] = lassopred(config, patient, finger, 0, numpredictions);
                 %lambda{patient,finger} = lambda1;
@@ -379,7 +379,7 @@ elseif (cv==2)
         retweights.('trainlinreg') = linweights;
         
         % save the weights to a file for processing with finalrun.m
-        % save('weight_linreg.mat','linweights');
+        save('weight_linreg.mat','linweights');
         
     end
     
@@ -400,7 +400,7 @@ elseif (cv==2)
     if dolasso
         for patient = 1:3
             for finger = [1,2,3,5]
-                finger
+                finger;
                 
                 %[a,lambda1] = lassopred(config, patient, finger, 0, numpredictions);
                 %lambda{patient,finger} = lambda1;

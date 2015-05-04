@@ -2,10 +2,10 @@
 % this file will use the weights foudn earlier and then make predictions of
 % the test data
 
-function[] = finalrun(config, dolinearreg, dosvr, dolasso, doclassifyfinger, doregresstree )
+function[predicted_dg] = finalrun(config, dolinearreg, dosvr, dolasso, doclassifyfinger, doregresstree, numpredictions)
 
 % clean things
-clearvars -except config dolinearreg dosvr dolasso doclassifyfinger doregresstree
+clearvars -except config dolinearreg dosvr dolasso doclassifyfinger doregresstree numpredictions
 clc;
 close all;
 
@@ -32,7 +32,7 @@ svmmodel = cell(3,5);
 %
 
 % always set recalculate feats unless you run this same file back to back
-recalculatefeats = 1;
+recalculatefeats = 0;
 
 % CV SHOULD ONLY BE 0 IN THIS FILE
 cv = 0;
@@ -40,43 +40,7 @@ cv = 0;
 
 %% Get all the data from the portal %%
 % don't redownload if the data already exists
-getData('shanjitsingh', 'login,bin');
-
-
-
-%% Step 2: Make all the features
-
-% if recalculate feats is on then recalculate (default on)
-if recalculatefeats
-    disp('Recalculating all the features');
-    
-    % 
-    % this is for shuffling raw eeg signals - our code doesn't do this
-    % though.
-    %
-    shuffleindices = randperm(310000);
-    
-    delete('x_train_*');
-    delete('x_test_*');
-    
-    [x_train_1, y_train_1, x_test_1, y_test_1] = getFeatures(config, 1, shuffleindices, cv, 0);
-    save('x_train_1.mat','x_train_1','y_train_1');
-    save('x_test_1.mat', 'x_test_1', 'y_test_1');
-    
-    [x_train_2, y_train_2, x_test_2, y_test_2] = getFeatures(config, 2, shuffleindices, cv, 0);
-    save('x_train_2.mat','x_train_2','y_train_2');
-    save('x_test_2.mat', 'x_test_2', 'y_test_2');
-    
-    [x_train_3, y_train_3, x_test_3, y_test_3] = getFeatures(config, 3, shuffleindices, cv, 0);
-    save('x_train_3.mat','x_train_3','y_train_3');
-    save('x_test_3.mat', 'x_test_3', 'y_test_3');
-    
-else
-    disp('Not recalculating features.');
-    
-end
-
-clearvars x_train_1 y_train_1 x_train_2 y_train_2 x_train_3 y_train_3 x_test_1 x_test_2 x_test_3 recalculateFeatures y_test_1 y_test_2 y_test_3;
+% getData('shanjitsingh', 'login,bin');
 
 
 %% Use the saved features to make models
@@ -90,7 +54,7 @@ disp('Doing predictions now');
 
 
 % number of predictions to be made
-numpredictions = 147500;
+% numpredictions = 147500;
 
 if dolinearreg
     disp('Doing prediction via linear regression');
@@ -151,7 +115,7 @@ end
 %
 
 for patient = 1:3
-        predicted_dg{patient} = predicted_dg_lasso{patient};% + predicted_dg_lin{patient} + predicted_dg_regtree{patient})/3.0;% (0.428*predicted_dg_lasso{patient} + 0.351*predicted_dg_lin{patient})/(0.428+0.351);
+        predicted_dg{patient} = (0.7*predicted_dg_lasso{patient}) + (0.3*predicted_dg_lin{patient});% + predicted_dg_regtree{patient})/3.0;% (0.428*predicted_dg_lasso{patient} + 0.351*predicted_dg_lin{patient})/(0.428+0.351);
 end
 predicted_dg = predicted_dg';
 
@@ -163,65 +127,65 @@ predicted_dg = predicted_dg';
 % end
 
 
-max_predicted_dg = cell(3,1);
-min_predicted_dg = cell(3,1);
-
-for i = 1:3
-    for j = 1:numpredictions
-        for k = 1:5
-            if(abs(predicted_dg{i}(j,k))<0.3)
-                predicted_dg{i}(j,k) = 0;
-            end
-            %predicted_dg{i}(j,k) = fix(predicted_dg{i}(j,k));
-        end
-
-
-    end
-end
-
-
-
-
-for i = 1:3
-    for j = 1:numpredictions
-        for k = 1:5
-            if(abs(1-predicted_dg{i}(j,k))<0.1)
-                predicted_dg{i}(j,k) = 1;
-            end
-            %predicted_dg{i}(j,k) = fix(predicted_dg{i}(j,k));
-        end
-
-
-    end
-end
-
-
-for i = 1:3
-    for j = 1:numpredictions
-        for k = 1:5
-            if(abs(2-predicted_dg{i}(j,k))<0.8)
-                predicted_dg{i}(j,k) = 2;
-            end
-            %predicted_dg{i}(j,k) = fix(predicted_dg{i}(j,k));
-        end
-
-
-    end
-end
-
-
-for i = 1:3
-    for j = 1:numpredictions
-        for k = 1:5
-            if(abs(3-predicted_dg{i}(j,k))<0.4)
-                predicted_dg{i}(j,k) = 3;
-            end
-            %predicted_dg{i}(j,k) = fix(predicted_dg{i}(j,k));
-        end
-
-
-    end
-end
+% max_predicted_dg = cell(3,1);
+% min_predicted_dg = cell(3,1);
+% 
+% for i = 1:3
+%     for j = 1:numpredictions
+%         for k = 1:5
+%             if(abs(predicted_dg{i}(j,k))<0.3)
+%                 predicted_dg{i}(j,k) = 0;
+%             end
+%             %predicted_dg{i}(j,k) = fix(predicted_dg{i}(j,k));
+%         end
+% 
+% 
+%     end
+% end
+% 
+% 
+% 
+% 
+% for i = 1:3
+%     for j = 1:numpredictions
+%         for k = 1:5
+%             if(abs(1-predicted_dg{i}(j,k))<0.1)
+%                 predicted_dg{i}(j,k) = 1;
+%             end
+%             %predicted_dg{i}(j,k) = fix(predicted_dg{i}(j,k));
+%         end
+% 
+% 
+%     end
+% end
+% 
+% 
+% for i = 1:3
+%     for j = 1:numpredictions
+%         for k = 1:5
+%             if(abs(2-predicted_dg{i}(j,k))<0.8)
+%                 predicted_dg{i}(j,k) = 2;
+%             end
+%             %predicted_dg{i}(j,k) = fix(predicted_dg{i}(j,k));
+%         end
+% 
+% 
+%     end
+% end
+% 
+% 
+% for i = 1:3
+%     for j = 1:numpredictions
+%         for k = 1:5
+%             if(abs(3-predicted_dg{i}(j,k))<0.4)
+%                 predicted_dg{i}(j,k) = 3;
+%             end
+%             %predicted_dg{i}(j,k) = fix(predicted_dg{i}(j,k));
+%         end
+% 
+% 
+%     end
+% end
 
 % for i = 1:3
 %     for j = 1:numpredictions
@@ -236,18 +200,18 @@ end
 
 
 
-for i = 1:3
-    for j = 1:numpredictions
-        for k = 1:5
-            if(abs(3-predicted_dg{i}(j,k))<0.4)
-                predicted_dg{i}(j,k) = 3;
-            end
-            %predicted_dg{i}(j,k) = fix(predicted_dg{i}(j,k));
-        end
-
-
-    end
-end
+% for i = 1:3
+%     for j = 1:numpredictions
+%         for k = 1:5
+%             if(abs(3-predicted_dg{i}(j,k))<0.4)
+%                 predicted_dg{i}(j,k) = 3;
+%             end
+%             %predicted_dg{i}(j,k) = fix(predicted_dg{i}(j,k));
+%         end
+% 
+% 
+%     end
+% end
 
 
 
@@ -280,7 +244,7 @@ end
 %     predicted_dg{i}(j,find(predicted_dg{i}(j,:) ~= max(predicted_dg{i}(j,:)))) = zeros(1,size(find(predicted_dg{i}(j,:) ~= max(predicted_dg{i}(j,:))),2));
 %     end
 % end
-
+delete('predicted_dg.mat')
 save('predicted_dg.mat', 'predicted_dg');
 
 
