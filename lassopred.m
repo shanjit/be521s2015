@@ -10,8 +10,16 @@ if(calclasso==1)
     x_train = tl.(strcat('x_train_',num2str(patient)));
     y_train = tl.(strcat('y_train_',num2str(patient)));
     
-    y_train = y_train(:,finger);
     
+    for finger = 1:5
+    y_train_temp = y_train(:,finger);
+   
+    
+    [b,stats] = lasso(x_train, y_train_temp);    
+    
+   
+    
+    end
     nfolds = 3;
     
     data = [y_train, x_train];

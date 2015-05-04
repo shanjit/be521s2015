@@ -14,6 +14,10 @@
 %
 %
 
+clear all;
+clc;
+
+
 cv = 3;
 
 % window length in milliseconds
@@ -73,5 +77,5 @@ elseif cv==2
     
 elseif cv==3
     
-    finalrun(config, 1, 0, 1, 1);
+    finalrun(config, 0, 0, 1, 0, 0);
 end
