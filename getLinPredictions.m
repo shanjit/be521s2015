@@ -16,21 +16,22 @@ temp1 = (1:x)*(noverlap/1000);
 temp2 = (1:totalSize)*(1/1000);
 
 for i = 1:5
-    predictions(:,i) = spline(temp1,u(:,i),temp2)';
+    temp_predictions(:,i) = spline(temp1,u(:,i),temp2)';
     
+% trying a weiner filter    
 %     
 %     a = lpc(predictions(:,i),5);
 %     predictions(:,i) = filter([0 -a(2:end)],1,predictions(:,i));
 %     
     
     % moving average filter to smooth stuff out
-    predictions(:,i) = smooth(predictions(:,i),20,'moving'); % does rloess make a big difference
+    temp_predictions(:,i) = smooth(temp_predictions(:,i),20,'moving'); % does rloess make a big difference
     
     
     
 end
 
-finalpredictions = predictions;
+finalpredictions = temp_predictions;
 
 
 
@@ -46,19 +47,19 @@ if(y_test~=-1)
     temp2 = (1:totalSize)*(1/1000);
     
     for i = 1:5
-        predictions(:,i) = spline(temp1,u(:,i),temp2)';
+        temp_predictions(:,i) = spline(temp1,u(:,i),temp2)';
         
 %         a = lpc(predictions(:,i),5);
 %         predictions(:,i) = filter([0 -a(2:end)],1,predictions(:,i));
 %     
 %     
         % moving average filter to smooth stuff out
-        predictions(:,i) = smooth(predictions(:,i),20,'moving'); % does rloess make a big difference
+        temp_predictions(:,i) = smooth(temp_predictions(:,i),20,'moving'); % does rloess make a big difference
     
        
     end
     
-    y_test = predictions;
+    y_test = temp_predictions;
     rho{1} = corr(y_test(:,1),finalpredictions(:,1));
     rho{2} = corr(y_test(:,2),finalpredictions(:,2));
     rho{3} = corr(y_test(:,3),finalpredictions(:,3));

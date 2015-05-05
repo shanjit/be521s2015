@@ -26,7 +26,7 @@ if(calclasso==1)
     [learn, val] = kfolds(data,nfolds);
     
     %
-    predictions = -1;
+    temp_predictions = -1;
     arr = cell(3,1);
     %
     for i=1:nfolds
@@ -64,14 +64,14 @@ elseif(calclasso==0)
         temp2 = (1:totalSize)*(1/1000);
         
         for i = 1:1
-            predictions(:,i) = spline(temp1,u(:,i),temp2)';
+            temp_predictions(:,i) = spline(temp1,u(:,i),temp2)';
             
-            predictions(:,i) = smooth(predictions(:,i),20,'moving'); % does rloess make a big difference
+            temp_predictions(:,i) = smooth(temp_predictions(:,i),20,'moving'); % does rloess make a big difference
             
         end
         
 
-    finalpredictions = predictions;
+    finalpredictions = temp_predictions;
     
     RetFitInfo = -1;
     

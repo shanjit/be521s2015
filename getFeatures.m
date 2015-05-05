@@ -45,8 +45,9 @@ end
 % [x_train, x_test] = featureNorm(xtrain, xtest, xtrain, 0, 1);
 % xtrain = x_train(:,2:end);
 % xtest = x_test(:,2:end);
-
-
+% 
+% xtrain = [ones(size(xtrain,1),1), xtrain];
+% xtest = [ones(size(xtest,1),1), xtest];
 
 end
 
